@@ -13,9 +13,11 @@ problema2: problema2.cpp
 problema3: problema3.cpp
 	$(CC) $(CFLAGS) problema3.cpp -o problema3
 
-
 test2: problema2 
 	$(TEST_CORRECTITUD) test/ElImperioContraatacaTester.jar ./problema2 $(N_TESTS)
+
+test3: problema3
+	$(TEST_CORRECTITUD) test/ElRetornoDelJediTester.jar ./problema3 $(N_TESTS)
 
 clean:
 	rm -rf problema1 problema2 problema3
