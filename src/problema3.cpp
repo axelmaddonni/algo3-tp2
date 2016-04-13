@@ -23,9 +23,9 @@ int main() {
   vector<vector<Casilla>> Tablero(n, vector<Casilla>(m, Casilla()));
 
   for (int i = 0; i < n; i++) {
-  	for (int j = 0; j < m; j++) {
+    for (int j = 0; j < m; j++) {
       cin >> get<0>(Tablero[i][j]);
-  	}
+    }
   }
 
   cout << solve(Tablero, n, m, h) << endl;
@@ -34,13 +34,13 @@ int main() {
   int i = n - 1;
   int j = m - 1;
   while (!(i == 0 && j == 0)) {
-  	const char mov = get<2>(Tablero[i][j]);
-  	camino.push_front(mov);
-  	mov == 'Y' ? j-- : i--;
+    const char mov = get<2>(Tablero[i][j]);
+    camino.push_front(mov);
+    mov == 'Y' ? j-- : i--;
   }
 
   for (const char mov : camino)
-  	cout << mov << endl;
+    cout << mov << endl;
 
   return 0;
 }
@@ -61,27 +61,27 @@ int costocolumna(const vector<vector<Casilla>>& t, int h, int i, int j) {
 
 
 int solve(vector<vector<Casilla>>& t, int n, int m, int h) {
-	get<1>(t[0][0]) = 0;
+  get<1>(t[0][0]) = 0;
 
-	for (int j=1; j < m; j++){
-		get<1>(t[0][j]) = costocolumna(t, h, 0, j);
-		get<2>(t[0][j]) = 'Y';
-	}
+  for (int j=1; j < m; j++){
+    get<1>(t[0][j]) = costocolumna(t, h, 0, j);
+    get<2>(t[0][j]) = 'Y';
+  }
 
-	for (int i=1; i < n; i++){
-		get<1>(t[i][0]) = costofila(t, h, i, 0);
-		get<2>(t[i][0]) = 'X';
-	}
+  for (int i=1; i < n; i++){
+    get<1>(t[i][0]) = costofila(t, h, i, 0);
+    get<2>(t[i][0]) = 'X';
+  }
 
-	for (int i = 1 ; i < n; i++){
-		for (int j = 1; j < m; j++){
-			get<1>(t[i][j]) = min(costofila(t, h, i, j), costocolumna(t, h, i, j));
-			if (get<1>(t[i][j]) == costofila(t, h, i, j))
-				get<2>(t[i][j]) = 'X';
-			else
-				get<2>(t[i][j]) = 'Y';
-		}
-	}
-	
-	return get<1>(t[n-1][m-1]);
+  for (int i = 1 ; i < n; i++){
+    for (int j = 1; j < m; j++){
+      get<1>(t[i][j]) = min(costofila(t, h, i, j), costocolumna(t, h, i, j));
+      if (get<1>(t[i][j]) == costofila(t, h, i, j))
+        get<2>(t[i][j]) = 'X';
+      else
+        get<2>(t[i][j]) = 'Y';
+    }
+  }
+
+  return get<1>(t[n-1][m-1]);
 }
