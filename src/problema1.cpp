@@ -1,4 +1,3 @@
-#include "problema1.h"
 #include <iostream>
 #include <vector>
 #include <queue>
@@ -15,13 +14,12 @@ vector<vertice> bfs(vector<VerticesAdyacentes> vs, vertice root, int n) {
   distancia[root] = 0;
   acm[root] = root;
   c.push(root);
-  while(!c.empty()){
+  while (!c.empty()) {
     actual = c.front();   
     c.pop();
     VerticesAdyacentes vecinos = vs[actual];
-    for(int i = 0; i < vecinos.size(); i++){
-      vertice v = vecinos[i];
-      if(distancia[v] == -1){
+    for (const vertice& v : vecinos) {
+      if (distancia[v] == -1) {
         distancia[v] = distancia[actual]+1;
         acm[v] = actual;
         c.push(v);
@@ -32,7 +30,7 @@ vector<vertice> bfs(vector<VerticesAdyacentes> vs, vertice root, int n) {
   vector<vertice> solucion(distancia[n-1]-1, 0);
   vertice v = acm[n-1];
 
-  for(int i = distancia[n-1]-2; i >= 0; i--){
+  for (int i = distancia[n-1] - 2; i >= 0; i--) {
     solucion[i] = v % (n/3);
     v = acm[v];
   }
@@ -57,7 +55,7 @@ int main() {
     adj_list[ai + 2*n].push_back(bi + 2*n);
     adj_list[bi + 2*n].push_back(ai + 2*n);
 
-    if(ei) {
+    if (ei) {
       adj_list[ai].push_back(bi + n);
       adj_list[ai + n].push_back(bi + 2*n);
       adj_list[bi].push_back(ai + n);
@@ -67,8 +65,8 @@ int main() {
 
   vector<vertice> solucion = bfs(adj_list, 0, 3*n);
   cout << solucion.size() + 1 << endl;
-  for(int i = 0; i < solucion.size(); i++){
-    cout << solucion[i] << " ";
+  for (const int s : solucion) {
+    cout << s << " ";
   }
   cout << endl;
 }
