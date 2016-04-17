@@ -1,0 +1,105 @@
+\documentclass[hidelinks,a4paper,12pt, nofootinbib]{article}
+\usepackage[width=15.5cm, left=3cm, top=2.5cm, right=2cm, left=2cm, height= 24.5cm]{geometry}
+\usepackage[spanish, es-tabla]{babel} %es-tabla es para que ponga Tabla en vez de Cuadro en el caption
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{xspace}
+\usepackage{xargs}
+\usepackage{fancyhdr}
+\usepackage{lastpage}
+\usepackage{caratula}
+\usepackage[bottom]{footmisc}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{algorithm}
+\usepackage[noend]{algpseudocode}
+\usepackage{array}
+\usepackage{xcolor,colortbl}
+\usepackage{amsthm}
+\usepackage{listings}
+\usepackage{soul}
+
+\usepackage{pgf}
+\usepackage{tikz}
+\usetikzlibrary{arrows,automata}
+
+\usepackage{graphicx}
+\usepackage{sidecap}
+\usepackage{amsmath}
+\usepackage{wrapfig}
+\usepackage{caption}
+
+\usepackage{hyperref}
+\hypersetup{
+  colorlinks   = true, %Colours links instead of ugly boxes
+  urlcolor     = blue, %Colour for external hyperlinks
+  linkcolor    = blue, %Colour of internal links
+  citecolor   = red %Colour of citations
+}
+
+\usepackage{comment}
+
+\usepackage[
+  backend=bibtex,
+  style=alphabetic
+]{biblatex}
+\addbibresource{bibliografia.bib}
+
+
+\captionsetup[table]{labelsep=space}
+
+
+\setlength{\parindent}{4em}
+\setlength{\parskip}{0.5em}
+
+%Defino colores para las tablas
+\definecolor{LightCyan}{rgb}{0.77,0.9,0.9}
+\definecolor{Gray}{gray}{0.8}
+
+
+%%fancyhdr
+\pagestyle{fancy}
+\thispagestyle{fancy}
+\addtolength{\headheight}{1pt}
+\lhead{Aalgoritmos y Estructuras de Datos III: TP2}
+\rhead{$1º$ cuatrimestre de 2016}
+\cfoot{\thepage\ / \pageref{LastPage}}
+\renewcommand{\footrulewidth}{0.4pt}
+\renewcommand{\labelitemi}{$\bullet$}
+
+%%caratula
+\materia{Algoritmos y Estructuras de Datos III}
+\titulo{Trabajo Práctico Número 2}
+%\subtitulo{}
+%\grupo{Grupo 12}
+\integrante{Ciruelos Rodríguez, Gonzalo}{063/14}{gonzalo.ciruelos@gmail.com}
+\integrante{Costa, Manuel José Joaquín}{035/14}{manucos94@gmail.com}
+\integrante{Gatti, Mathias Nicolás}{477/14}{mathigatti@gmail.com}
+\integrante{Maddonni, Axel Ezequiel}{200/14}{axel.maddonni@gmail.com}
+
+\fecha{8 de Abril de 2016}
+
+\usepackage{etoolbox}
+\AtBeginEnvironment{tikzpicture}{\shorthandoff{>}\shorthandoff{<}}{}{}
+
+\begin{document}
+\maketitle
+
+\tableofcontents
+\newpage
+
+\section{Una Nueva Esperanza}
+\input{esperanza.tex}
+\newpage
+
+\section{El Imperio Contraataca}
+\input{imperio.tex}
+\newpage
+
+\section{ El Retorno del \texorpdfstring{\st{que te}} \\ Jedi}
+\input{retorno_del_jedi.tex}
+\newpage
+\section{Apéndice}
+\input{apendice.tex}
+
+\end{document}
