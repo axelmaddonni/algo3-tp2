@@ -1,8 +1,9 @@
-#include <iostream>
-#include <vector>
-#include <tuple>
-#include <list>
 #include <algorithm> // min
+#include <chrono>
+#include <iostream>
+#include <list>
+#include <tuple>
+#include <vector>
 
 using namespace std;
 
@@ -28,7 +29,11 @@ int main() {
     }
   }
 
-  cout << solve(Tablero, n, m, h) << endl;
+
+  std::chrono::time_point<std::chrono::system_clock> start, end;
+  start = std::chrono::system_clock::now(); /* Empezamos medicion de tiempo */
+
+  int resultado = solve(Tablero, n, m, h);
   // Armo el camino mínimo.
   list<char> camino;
   int i = n - 1;
@@ -39,6 +44,12 @@ int main() {
     mov == 'Y' ? j-- : i--;
   }
 
+  end = std::chrono::system_clock::now(); /* Terminamos medicion de tiempo */
+  #ifdef TOMAR_TIEMPO
+  std::cerr << std::chrono::duration<double>(end - start).count();
+  #endif
+
+  cout << resultado << endl;
   for (const char mov : camino)
     cout << mov << endl;
 

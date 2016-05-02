@@ -1,7 +1,8 @@
 #include "problema2.h"
-#include <limits>
-#include <cstddef>
 
+#include <chrono>
+#include <cstddef>
+#include <limits>
 
 // Función para debugear.
 void printVertexVector(std::vector<Vertex>& vs) {
@@ -87,7 +88,8 @@ void MinHeap::MinHeapify(int i) {
     }
 }
 
-void prim(MinHeap& heap, std::vector<VerticesAdyacentes> adj_list) {
+std::pair<int, std::vector<int>> prim(
+    MinHeap& heap, std::vector<VerticesAdyacentes> adj_list) {
   std::vector<int> parent(heap.Size(), 0);
   int litros = 0;
 
@@ -105,10 +107,7 @@ void prim(MinHeap& heap, std::vector<VerticesAdyacentes> adj_list) {
       }
     }
   }
-  std::cout << litros << std::endl;
-  for (size_t i = 1; i < parent.size(); i++) {
-    std::cout << parent[i] << std::endl;
-  }
+  return std::make_pair(litros, std::move(parent));
 }
 
 
@@ -124,14 +123,26 @@ int main() {
     adj_list[bi].push_back(std::make_pair(ai, li));
   }
 
+  std::chrono::time_point<std::chrono::system_clock> start, end;
+  start = std::chrono::system_clock::now(); /* Empezamos medicion de tiempo */
+
   std::vector<Vertex> v_inicial;
   v_inicial.push_back({.key = 0, .value = 0});
   for (int i = 1; i < n; i++) {
     v_inicial.push_back({.key = i, .value = std::numeric_limits<int>::max()});
   }
-
   MinHeap h(v_inicial);  
-  prim(h, adj_list);
-}
-	
+  std::pair<int, std::vector<int>> resultado = prim(h, adj_list);
 
+  end = std::chrono::system_clock::now(); /* Terminamos medicion de tiempo */
+  #ifdef TOMAR_TIEMPO
+  std::cerr << std::chrono::duration<double>(end - start).count();
+  #endif
+
+  int& litros = resultado.first;
+  std::vector<int>& parent = resultado.second;
+  std::cout << litros << std::endl;
+  for (size_t i = 1; i < parent.size(); i++) {
+    std::cout << parent[i] << std::endl;
+  }
+}

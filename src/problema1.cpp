@@ -1,6 +1,7 @@
+#include <chrono>
 #include <iostream>
-#include <vector>
 #include <queue>
+#include <vector>
 
 using namespace std;
 typedef int vertice;
@@ -42,12 +43,19 @@ vector<vertice> bfs(vector<VerticesAdyacentes> vs, vertice root, int n) {
 int main() {
   int n, m;
   cin >> n >> m;
-  vector<VerticesAdyacentes> adj_list(3*n, VerticesAdyacentes());
-
+  vector<vector<int>> input;
   for (int i = 0; i < m; i++) {
-    int ai, bi;
-    bool ei;
+    int ai, bi, ei;
     cin >> ai >> bi >> ei;
+    input.push_back(vector<int>({ai, bi, ei}));
+  }
+
+  std::chrono::time_point<std::chrono::system_clock> start, end;
+  start = std::chrono::system_clock::now(); /* Empezamos medicion de tiempo */
+  vector<VerticesAdyacentes> adj_list(3*n, VerticesAdyacentes());
+  for (const vector<int>& arista : input) {
+    int ai = arista[0], bi = arista[1];
+    bool ei = arista[2];
     adj_list[ai].push_back(bi);
     adj_list[bi].push_back(ai);
     adj_list[ai + n].push_back(bi + n);
@@ -64,6 +72,12 @@ int main() {
   }
 
   vector<vertice> solucion = bfs(adj_list, 0, 3*n);
+  end = std::chrono::system_clock::now(); /* Terminamos medicion de tiempo */
+  #ifdef TOMAR_TIEMPO
+  std::cerr << std::chrono::duration<double>(end - start).count();
+  #endif
+
+
   cout << solucion.size() + 1 << endl;
   for (const int s : solucion) {
     cout << s << " ";
