@@ -23,6 +23,7 @@ vector<vertice> bfs(vector<VerticesAdyacentes> vs, vertice root, int n) {
       if (distancia[v] == -1) {
         distancia[v] = distancia[actual]+1;
         acm[v] = actual;
+        if(v == n-1) break;
         c.push(v);
       }
     }
