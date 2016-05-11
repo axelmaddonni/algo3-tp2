@@ -8,7 +8,7 @@ typedef int vertice;
 typedef vector<vertice> VerticesAdyacentes;
 typedef vector<VerticesAdyacentes> ListaAdyacencia;
 
-vector<vertice> bfs(ListaAdyacencia vs, vertice root, int n) {
+vector<vertice> bfs(ListaAdyacencia vs, vertice root, vertice target, int n) {
   queue<vertice> c;
   vector<int> distancia(n, -1); 
   vector<int> acm(n, -1);
@@ -24,17 +24,17 @@ vector<vertice> bfs(ListaAdyacencia vs, vertice root, int n) {
       if (distancia[v] == -1) {
         distancia[v] = distancia[actual]+1;
         acm[v] = actual;
-        if(v == n-1) break;
+        if(v == target) break;
         c.push(v);
       }
     }
   }
   //Tengo que reconstruir el camino de atrás 
   //para adelante
-  int long_sol = distancia[n-1]-1;
+  int long_sol = distancia[target]-1;
   vector<vertice> solucion(long_sol, 0);
   //Arranco en el padre del nodo n-1
-  vertice v = acm[n-1];
+  vertice v = acm[target];
 
   for (int i = long_sol - 1; i >= 0; i--) {
     solucion[i] = v;
@@ -77,13 +77,12 @@ int main() {
     adj_list[bi + 2*n].push_back(ai + 2*n);
   }
 
-  vector<vertice> solucion = bfs(adj_list, 0, 3*n);
+  vector<vertice> solucion = bfs(adj_list, 0, 3*n-1, 3*n);
   end = std::chrono::system_clock::now(); /* Terminamos medicion de tiempo */
   #ifdef TOMAR_TIEMPO
   std::cerr << std::chrono::duration<double>(end - start).count();
   #endif
-
-
+  
   cout << solucion.size() + 1 << endl;
   for (const int s : solucion) {
     cout << s % n << " ";
