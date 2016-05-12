@@ -6,8 +6,9 @@
 using namespace std;
 typedef int vertice;
 typedef vector<vertice> VerticesAdyacentes;
+typedef vector<VerticesAdyacentes> ListaAdyacencia;
 
-vector<vertice> bfs(vector<VerticesAdyacentes> vs, vertice root, int n) {
+vector<vertice> bfs(ListaAdyacencia vs, vertice root, vertice target, int n) {
   queue<vertice> c;
   vector<int> distancia(n, -1); 
   vector<int> acm(n, -1);
@@ -23,16 +24,20 @@ vector<vertice> bfs(vector<VerticesAdyacentes> vs, vertice root, int n) {
       if (distancia[v] == -1) {
         distancia[v] = distancia[actual]+1;
         acm[v] = actual;
+        if(v == target) break;
         c.push(v);
       }
     }
   }
+  //Tengo que reconstruir el camino de atrás 
+  //para adelante
+  int long_sol = distancia[target]-1;
+  vector<vertice> solucion(long_sol, 0);
+  //Arranco en el padre del nodo n-1
+  vertice v = acm[target];
 
-  vector<vertice> solucion(distancia[n-1]-1, 0);
-  vertice v = acm[n-1];
-
-  for (int i = distancia[n-1] - 2; i >= 0; i--) {
-    solucion[i] = v % (n/3);
+  for (int i = long_sol - 1; i >= 0; i--) {
+    solucion[i] = v;
     v = acm[v];
   }
 
@@ -52,35 +57,35 @@ int main() {
 
   std::chrono::time_point<std::chrono::system_clock> start, end;
   start = std::chrono::system_clock::now(); /* Empezamos medicion de tiempo */
-  vector<VerticesAdyacentes> adj_list(3*n, VerticesAdyacentes());
+  ListaAdyacencia adj_list(3*n, VerticesAdyacentes());
   for (const vector<int>& arista : input) {
     int ai = arista[0], bi = arista[1];
     bool ei = arista[2];
-    adj_list[ai].push_back(bi);
-    adj_list[bi].push_back(ai);
-    adj_list[ai + n].push_back(bi + n);
-    adj_list[bi + n].push_back(ai + n);
-    adj_list[ai + 2*n].push_back(bi + 2*n);
-    adj_list[bi + 2*n].push_back(ai + 2*n);
-
     if (ei) {
       adj_list[ai].push_back(bi + n);
       adj_list[ai + n].push_back(bi + 2*n);
       adj_list[bi].push_back(ai + n);
       adj_list[bi + n].push_back(ai + 2*n);
+    } else {
+      adj_list[ai].push_back(bi);
+      adj_list[bi].push_back(ai);
+      adj_list[ai + n].push_back(bi + n);
+      adj_list[bi + n].push_back(ai + n);
     }
+
+    adj_list[ai + 2*n].push_back(bi + 2*n);
+    adj_list[bi + 2*n].push_back(ai + 2*n);
   }
 
-  vector<vertice> solucion = bfs(adj_list, 0, 3*n);
+  vector<vertice> solucion = bfs(adj_list, 0, 3*n-1, 3*n);
   end = std::chrono::system_clock::now(); /* Terminamos medicion de tiempo */
   #ifdef TOMAR_TIEMPO
   std::cerr << std::chrono::duration<double>(end - start).count();
   #endif
-
-
+  
   cout << solucion.size() + 1 << endl;
   for (const int s : solucion) {
-    cout << s << " ";
+    cout << s % n << " ";
   }
   cout << endl;
 }
