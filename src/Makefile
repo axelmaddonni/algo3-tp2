@@ -27,7 +27,7 @@ test: test1 test2 test3
 
 tiempos1: CFLAGS += -DTOMAR_TIEMPO
 tiempos1: problema1
-	$(PYTHON) exp/tiempos.py 1 20 100 5
+	$(PYTHON) exp/tiempos.py 1 20 60 200
 
 tiempos2: CFLAGS += -DTOMAR_TIEMPO
 tiempos2: problema2
@@ -35,7 +35,7 @@ tiempos2: problema2
 
 tiempos3: CFLAGS += -DTOMAR_TIEMPO
 tiempos3: problema3
-	$(PYTHON) exp/tiempos.py 3 1 300 1
+	$(PYTHON) exp/tiempos.py 3 10 100 30
 
 
 clean:
