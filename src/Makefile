@@ -31,7 +31,7 @@ tiempos1: problema1
 
 tiempos2: CFLAGS += -DTOMAR_TIEMPO
 tiempos2: problema2
-	$(PYTHON) exp/tiempos.py 2 400 5000 20
+	$(PYTHON) exp/tiempos.py 2 100 1000 10
 
 tiempos3: CFLAGS += -DTOMAR_TIEMPO
 tiempos3: problema3

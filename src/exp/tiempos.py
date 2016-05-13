@@ -10,9 +10,12 @@ import sys
 import os
 import subprocess
 from collections import defaultdict
+import cProfile
+import copy
 
 import matplotlib.pyplot as plt
 import numpy as np
+from scipy import stats
 import math
 
 archivo = "data.in"
@@ -28,7 +31,8 @@ def grafo_random(n, m):
     if not (n - 1 <= m <= n * (n - 1) / 2):
         return None
     k_n = filter(lambda l: l[0] < l[1],
-            [[i, j, 1] for i in range(n) for j in range(n)])
+            [(i, j, 1) for i in range(n) for j in range(n)])
+    k_n_copia = copy.copy(k_n)
     # Hago Prim (trivial porque todas las aristas pesan lo mismo).
     vertices = [random.randint(0, n - 1)]
     agm = []
@@ -38,8 +42,10 @@ def grafo_random(n, m):
               (l[0] in vertices and l[1] not in vertices) or
               (l[1] in vertices and l[0] not in vertices),
             k_n)
+
         arista_nueva = random.choice(aristas_frescas)
-        k_n.remove(arista_nueva)
+        k_n = aristas_frescas
+        k_n_copia.remove(arista_nueva)
         agm.append(arista_nueva)
         if arista_nueva[0] in vertices:
             vertices.append(arista_nueva[1])
@@ -48,12 +54,14 @@ def grafo_random(n, m):
 
     return map(
             lambda l: [l[0], l[1], random.randint(0,MAX_PESO)],
-            agm if k_n == [] else agm + random.sample(k_n, m - len(agm)))
+            agm if k_n == [] else agm + random.sample(k_n_copia, m - len(agm)))
 
-def correr_programa(binario):
-    p = subprocess.Popen("cat " + archivo + " | " + binario,
+def correr_programa(binario, input_string):
+    p = subprocess.Popen(binario,
                          shell = True,
+                         stdin=subprocess.PIPE,
                          stderr=subprocess.PIPE, stdout=subprocess.PIPE)
+    p.stdin.write(input_string)
     out, err = p.communicate()
     return 1000000 * float(err)
 
@@ -76,11 +84,12 @@ binario = binarios[problema]
 def encontrar_k(puntos, f):
     ks = []
     for n, tiempo in puntos:
-        f_n = 0
+        f_n = 0.0
         try: f_n = f(n)
         except: pass
+        print n, f_n
 
-        if f_n == 0: continue
+        if f_n == 0.0: continue
         tiempo_normalizado = tiempo / f(n)
         ks.append(tiempo_normalizado)
     return median(ks)
@@ -129,6 +138,16 @@ def generar1(n, cual):
         caminos_especiales -= 1
         f.write(str(ai) + " " + str(bi) + " " + str(ei) + "\n")
     return len(grafo)
+
+def generar2(n, m):
+    grafo = grafo_random(n, m)
+
+    input_string = ""
+    input_string += str(n) + " " + str(m) + "\n"
+    for arista in grafo:
+        input_string += ' '.join(map(str, arista))
+        input_string += "\n"
+    return input_string
 
 def generar3(n, m):
     f = open(archivo, "w")
@@ -200,6 +219,74 @@ def main1promedio():
     plt.ylabel("Tiempo (us) / (n + m)")
     plt.xlabel("Tamano de la entrada (n + m)")
     plt.ylim([0, 0.4])
+    plt.legend(loc=2)
+    '''
+
+    plt.savefig("fig.pdf")
+    plt.show()
+
+def normalizar(puntos, k, f):
+    return [y + (k * f(x) - y) * 0.5 for x, y in puntos]
+
+
+def main2():
+    datos = defaultdict(list)
+    for tamanio_muestra in range(0, ultimo, granularidad):
+        if tamanio_muestra == 0: tamanio_muestra = 5
+        for seed in range(cantidad_muestras):
+            mediciones = []
+            m = tamanio_muestra
+            n = random.randint(int((1 + math.sqrt(1 + 8 * m)) / 2) + 1, m)
+            input_string = generar2(n, m)
+            tiempo = min([correr_programa(binario, input_string) for _ in range(2)])
+            print n, m, tiempo / 1000000
+            datos[m].append(tiempo)
+
+    posiciones = sorted(datos.keys())
+    numeros = [datos[i] for i in posiciones]
+
+    puntos = zip(map(float, posiciones), map(median, numeros))
+
+    k = encontrar_k(puntos, lambda m: m * math.log(float(m))) * 1.2
+    posiciones_ints = map(int, posiciones)
+
+    plt.figure()
+    plt.boxplot(numeros, positions=posiciones_ints, widths=40)
+    plt.plot(posiciones_ints, map(lambda m: k * m * math.log(m), posiciones_ints),
+            label=str(k)[:5] + " * m log(m)",
+            color='g')
+    plt.ylabel("Tiempo (us)")
+    plt.xlabel("Tamano de la entrada (m)")
+    plt.legend(loc=2)
+
+    '''
+    datos = defaultdict(list)
+    for tamanio_muestra in range(0, ultimo, granularidad):
+        if tamanio_muestra == 0: tamanio_muestra = 5
+        for seed in range(cantidad_muestras):
+            mediciones = []
+            m = tamanio_muestra
+            n = random.randint(int((1 + math.sqrt(1 + 8 * m)) / 2) + 1, m)
+            input_string = generar2(n, m)
+            tiempo = min([correr_programa(binario, input_string) for _ in range(5)])
+            print n, m, tiempo / 1000000
+            datos[int(m * math.log(float(n)))].append(tiempo)
+
+    posiciones = sorted(datos.keys())
+    numeros = [datos[i] for i in posiciones]
+    puntos = zip(map(float, posiciones), map(min, numeros))
+    k = encontrar_k(puntos, lambda m: m) * 1.2
+    posiciones_ints = map(int, posiciones)
+
+    plt.figure()
+    plt.plot(posiciones_ints,
+            normalizar(zip(posiciones, map(min, numeros)), k, lambda x:x),
+            label="Nuestro algoritmo")
+    plt.ylabel("Tiempo (us)")
+    plt.xlabel("Tamano de la entrada (m log(n))")
+    plt.plot(posiciones_ints, map(lambda m: k * m, posiciones_ints),
+            label=str(k)[:5] + " * m log(n)",
+            color='g')
     plt.legend(loc=2)
     '''
 
