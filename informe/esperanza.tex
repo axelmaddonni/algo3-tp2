@@ -3,7 +3,7 @@ Sea $G=(V,E)$ un grafo simple conexo con $n\geq 2$ vértices y $m$ aristas. Adem
 
 En la figura (\ref{fig:ej-1.1}) pueden verse tres ejemplos. Los tres son muy parecidos pero permiten ilustrar distintas situaciones. En el primero (de izquierda a derecha y de arriba a abajo) encontramos el camino simple $P=(v_0,v_1,v_3,v_4,v_5)$ de longitud 4 que cumple con lo pedido pues tiene dos aristas especiales y es de longitud mínima. 
 
-En el segundo se agregó una arista corriente entre los nodos $v_0$ y $v_5$. Puede notarse que en este caso el mejor camino es $P=(v_0,v_2,v_0,v_5)$ de longitud 3, el cual claramente no es simple pues pasa dos veces por el vértice 0. 
+En el segundo se agregó una arista corriente entre los nodos $v_0$ y $v_5$. Puede notarse que en este caso el mejor camino es $P=(v_0,v_2,v_0,v_5)$ de longitud 3, el cual claramente no es simple pues pasa dos veces por el vértice $v_0$. 
 
 En el último caso, la arista recientemente agregada pasa a ser especial. Al hacer esto tenemos dos caminos de longitud mínima entre los que pasan por dos aristas especiales: el $P$ que encontramos antes, y $P'=(v_0, v_5, v_0, v_5)$. Notar que $P'$ no solo no es simple, sino que también usa a $v_5$ como nodo intermedio. Cualquiera de los dos es igualmente aceptable.
 
@@ -200,7 +200,80 @@ Entonces hasta acá tenemos tres grafos conexos isomorfos. Podemos pensarlos com
 
 Podemos pensar a $G^*$ con la siguiente analogía: cada una de las tres componentes es un nivel, y los arcos ``escaleras mecánicas'' que permiten subir de un nivel al siguiente en forma unidireccional y que no se saltea niveles. Notar que entonces $G'$ no es fuertemente conexo pues desde un nodo del nivel 2 o 3 no puedo alcanzar a un nodo en el nivel 1. Sin embargo, para cualquier vértice en el nivel 1 todos los vértices del grafo son alcanzables. En particular esto vale para $v_0$.  
 
-Finalmente, definimos a $G'$ como el resultado de quitarle a los niveles 0 y 1 de $G^*$ todas las ``aristas isomorfas'' a las aristas de $M$\footnote{En rigor, tanto $G'$ como $G^*$ sirven a nuestro propósito, pero $G'$ tiene la ventaja de que permitirá reducir el uso de memoria (potencialmente mucho si hay muchas aristas especiales) y constantes en la complejidad de la implementación.}. En este caso ya no es cierto que cualquier vértice de $G'$ sea alcanzable desde cualquier vértice del primer nivel: en efecto, si vemos la figura (\ref{fig:ej-1.2}), al quitarle las aristas especiales al primer nivel el nodo $v_5$ no es alcanzable desde el $v_1$. No obstante, sigue valiendo el siguiente lema:
+\pgfmathsetmacro\angFuite{170}
+\pgfmathsetmacro\coeffReduc{1.2}
+\pgfmathsinandcos\sint\cost{\angFuite}
+
+\begin{figure}
+\centering
+\begin{tikzpicture}[current plane/.estyle=%
+        {cm={1,0,\coeffReduc*\cost,-\coeffReduc*\sint,(0,#1)}}]
+
+	\GraphInit[vstyle=Shade]
+
+		\begin{scope}[current plane=0 cm]
+			\SetVertexNoLabel
+		  \SetGraphShadeColor{white}{teal}{gray}
+		  \grEmptyCycle[Math,prefix=a]{6}
+		\end{scope}
+
+		\begin{scope}[current plane=4 cm]
+			\SetVertexNoLabel
+		  \SetGraphShadeColor{white}{teal}{gray}
+		  \grEmptyCycle[Math,prefix=b]{6}
+		\end{scope}
+
+		\begin{scope}[current plane=8 cm]
+			\SetVertexNoLabel
+		  \SetGraphShadeColor{white}{teal}{gray}
+		  \grEmptyCycle[Math,prefix=c]{6}
+		\end{scope}
+
+	\AssignVertexLabel[Math]{a}{v_3,v_1,v_0,v_2,v_4,v_5}
+	\AssignVertexLabel[Math]{b}{v_9,v_7,v_6,v_8,v_{10},v_{11}}
+	\AssignVertexLabel[Math]{c}{v_{15},v_{13},v_{12},v_{14},v_{16},v_{17}}
+
+	\SetGraphShadeColor{white}{teal}{gray}
+	\Edge(a0)(a5)
+	\Edge(b0)(b5)
+	\Edge(a2)(a1)
+	\Edge(b2)(b1)
+	\Edge(a3)(a4)
+	\Edge(b3)(b4)
+	\EdgeInGraphLoop{c}{6}
+
+	\tikzset{EdgeStyle/.append style={dotted}}
+	\Edge(a2)(a3)
+	\Edge(b2)(b3)
+	\Edge(a1)(a0)
+	\Edge(b1)(b0)
+	\Edge(a4)(a5)
+	\Edge(b4)(b5)
+
+	\SetGraphShadeColor{white}{red}{red}
+	\tikzset{EdgeStyle/.append style={->, solid}}
+	\Edge(a2)(b3)
+	\Edge(b2)(c3)
+	\Edge(a4)(b5)
+	\Edge(b4)(c5)
+	\Edge(a1)(b0)
+	\Edge(b1)(c0)
+	\tikzset{EdgeStyle/.append style={<-, opacity=.3}}
+	\Edge(b2)(a3)
+	\Edge(c2)(b3)
+	\Edge(b4)(a5)
+	\Edge(c4)(b5)
+	\Edge(b1)(a0)
+	\Edge(c1)(b0)
+	
+\end{tikzpicture}
+\caption{$G'$ para el ejemplo dado en la figura (\ref{fig:ej-1.2}). Las líneas punteadas señalan dónde solía haber una arista especial.}
+\label{fig:ej-1.3}
+\end{figure}
+
+Finalmente, definimos a $G'$ como el resultado de quitarle a los niveles 0 y 1 de $G^*$ todas las ``aristas isomorfas'' a las aristas de $M$.\footnote{En rigor, tanto $G'$ como $G^*$ sirven a nuestro propósito, pero $G'$ tiene la ventaja de que permitirá reducir el uso de memoria (potencialmente mucho si hay muchas aristas especiales) y constantes en la complejidad de la implementación.}. 
+
+En este caso ya no es cierto que cualquier vértice de $G'$ sea alcanzable desde cualquier vértice del primer nivel: en efecto, si vemos la figura (\ref{fig:ej-1.2}), al quitarle las aristas especiales al primer nivel, el nodo $v_5$ no es alcanzable desde el $v_1$. No obstante, sigue valiendo el siguiente lema:
 
 \paragraph*{Lema 1.1: }Todo vértice del tercer nivel (nivel 2) de $G'$ es alcanzable desde todo vértice del primer nivel (nivel 0). 
 
@@ -216,20 +289,30 @@ En la sección siguiente probaremos que esto es equivalente a resolver el proble
 La siguiente proposición garantiza la correctitud de nuestra solución.
 
 \paragraph*{Proposición 1.1: }
-Sea $P'=(v_0, u_1,\dots, u_{k}, v_{3n-1})$ un camino mínimo de $v_0$ a $v_{3n-1}$ en $G'$, de longitud $k+1$, entonces $P = (P'$ mod $n$) \footnote{$P = P'$ mod $n \Leftrightarrow P_i = v_{j\text{ mod }n}\text{ donde $P'_i=v_j$ }, i = 0,\dots, k-1$}es camino de $v_0$ a $v_{n-1}$ en G, mínimo entre los que pasan por al menos dos aristas especiales.
+Sea $P'=(v_0, v_{i_1},\dots, v_{i_p}, v_{3n-1})$ un camino mínimo de $v_0$ a $v_{3n-1}$ en $G'$, entonces $P = P'$ mod $n$ \footnote{$P = P'$ mod $n \Leftrightarrow P_i = v_{j\text{ mod }n}\text{ donde $P'_i=v_j$ }, i = 0,\dots, k-1$} es camino de $v_0$ a $v_{n-1}$ en G, mínimo entre los que pasan por al menos dos aristas especiales.
 
 \paragraph*{Demostración: }
 
 Hay que ver tres cosas respecto de $P$: que es camino de $v_0$ a $v_{n-1}$, que pasa por al menos dos aristas especiales, y que es mínimo respecto a los caminos que cumplen ambas cosas.
 
-Va a ser útil recordar que $f_k:V\rightarrow V_k/ f_k(v_i) = v_{k\times n + i}$ para $k\in \{0,1,2\}$ son las biyecciones de los isomorfismos planteados en la sección anterior.
+Va a ser útil recordar que $f_k:V\rightarrow V_k/ f_k(v_i) = v_{k\times n + i}$ para $k\in \{0,1,2\}$ son las biyecciones de los isomorfismos planteados en la sección anterior. Además una pequeña observación que usaremos fuertemente: 
+
+\paragraph*{Observación 1.1: }$G=(V,E)$. $(u,w)\in E$ pero $(u,w)\notin M$ si y solo si $(f_0(u), f_0(w)), (f_1(u), f_1(w))$ y $(f_2(u), f_2(w))$ son aristas de $G'$. \\
+En cambio, $(u,w)\in M$ si y solo si los arcos $(f_0(u), f_1(w)),$ $(f_0(w), f_1(u)), (f_1(u), f_2(w))$ y $(f_1(w), f_2(u))$ están en $G'$. \\
+Ambas cosas valen por como construimos $G'$.
 
 \begin{itemize}
-	\item Es camino: Ante todo, por definición del operador módulo vale que $(\forall v_i\in P)$ $0\leq i$ mod $n\leq n-1$. Es decir que todos los vértices de $P$ pertenecen a $G$, y además empieza en $v_0$ y termina en $v_{n-1} = v_{(3n-1)\text{ mod } n}=v_{(2n+n-1)\text{ mod } n} $. Queda ver que efectivamente nodos consecutivos en $P$ son adyacentes en $G$. \\Si $v_i, v_j\in P$ son consecutivos entonces $v_{h+i}\in P'$ tiene que ser adyacente con $v_{h'+j}\in P'$, donde $h$ y $h'$ son un par de constantes múltiplos de $n$. Por el contexto del problema $h$ y $h'$ solo pueden ser $0, n$ o $2n$. Luego, si $h=h'=k\times n$, por definición de isomorfismo y por cómo está definida $f_k$, si $v_{h+i}$ es adyacente a $v_{h+j}$ en $G_k$ (cosa que pasa, sino no podría pasar en $G'$) entonces $v_i$ es adyacente a $v_j$ en $G$. Si $h\neq h'$, seguro que cada nodo es el extremo de un arco (pues están en diferentes niveles). Pero por construcción de $G'$, solo puede haber un arco entre $v_{h+i}$ y $v_{h'+j}$ si había una arista especial entre $v_i$ y $v_j$ en $G$, lo que significa que eran adyacentes. Luego, queda probado que $P$ es un camino válido de $v_0$ a $v_{n-1}$.
+	\item Es camino: Ante todo, por definición del operador módulo vale que
+	\begin{center}
+		$(\forall v_i\in P)$ $0\leq i$ mod $n\leq n-1$
+	\end{center}
+
+	 Es decir que todos los vértices de $P$ pertenecen a $G$, y además empieza en $v_0$ y termina en $v_{n-1} = v_{(3n-1)\text{ mod } n}=v_{(2n+n-1)\text{ mod } n} $. Queda ver que efectivamente nodos consecutivos en $P$ son adyacentes en $G$. \\Si $v_i, v_j\in P$ son consecutivos entonces $v_{h+i}\in P'$ tiene que ser adyacente con $v_{h'+j}\in P'$ (pues son nodos consecutivos en un camino), donde $h$ y $h'$ son un par de constantes múltiplos de $n$. Por el contexto del problema $h$ y $h'$ solo pueden ser $0, n$ o $2n$. Luego, si $h=h'=k\times n$, por la observación 1.1, si $v_{h+i}$ es adyacente a $v_{h+j}$ en $G_k$ (cosa que pasa, sino no podría pasar en $G'$) entonces $v_i$ es adyacente a $v_j$ en $G$. Si $h\neq h'$, seguro que cada nodo es el extremo de un arco (pues están en diferentes niveles). Pero por construcción de $G'$, solo puede haber un arco entre $v_{h+i}$ y $v_{h'+j}$ si había una arista especial entre $v_i$ y $v_j$ en $G$, lo que significa que eran adyacentes. Luego, queda probado que $P$ es un camino válido de $v_0$ a $v_{n-1}$.
 	\item Pasa por al menos dos aristas especiales: el nodo $v_{3n-1}$ pertenece al nivel 2 de $G'$. Esto significa que paso por dos arcos. Un arco entre $v_{k\times n + i}$ y $v_{(k+1)\times n + j}$ en $G'$ solo existe si $(v_i, v_j)\in M$. Por definición de $P$, si tal arco pertenece a $P'$ entonces tal arista especial pertenece a $P$. Luego, $P$ tiene al menos dos aristas de $M$ (podría tener más, pues en el tercer nivel las aristas especiales siguen existiendo y no son arcos).
 	\item Es mínimo: Supongamos que $P$ no es óptimo para el problema. Entonces existe $Q$ tal que $|Q| < |P|$ y cumple con pasar por dos aristas de $M$. Construyamos $Q'$, un camino de $v_0$ a $v_{3n-1}$ en $G'$, basado en $Q$.\\
-	 La idea es la siguiente: recorremos las aristas de $Q$ en orden y las vamos poniendo en $Q'$ hasta encontrar la primer arista especial, $(v_i, v_j)$. En su lugar agregamos el arco $(v_i, v_{n+j})$ a $Q'$. Seguimos completando $Q'$ con aristas $(f_1(u), f_1(w))$ por cada arista común $(u,w)$ que encontramos en $Q$. Eventualmente llegamos a una segunda arista especial (por hipótesis existe), $(v_s, v_t)$, y en su lugar agregamos el arco $(v_{n+s}, v_{2n+t})$ a $Q'$. Ahora bien, en este punto si $Q$ es mínimo lo mejor que puede hacer es tomar el camino de distancia mínima desde $v_t$ hasta $v_{n-1}$. Pero tal camino es isomorfo a un camino desde $v_{2n+t}$ hasta $v_{3n-1}$, pues el tercer nivel es isomorfo a $G$. Por lo tanto agregando este camino a $Q'$, llegamos a que $Q'$ es un camino de $v_0$ a $v_{3n-1}$ en $G'$. \\
-	 Pero como $|Q'|=|Q|<|P|=|P'|$, llegamos a que hay un camino más corto que $P'$ en $G'$ que conecta los mismos vértices. Esto es absurdo, pues por hipótesis $P'$ era camino mínimo. Luego, el absurdo provino de suponer que $P$ no era óptimo para el problema.
+	El método propuesto a continuación para armar $Q'$ hace uso fuertemente de la observación 1.1, pues esta nos garantiza que las aristas y arcos mencionados efectivamente existen en $G'$.\\
+	 La idea es la siguiente: recorremos las aristas de $Q$ en orden y las vamos poniendo en $Q'$ hasta encontrar la primer arista especial, $(v_i, v_j)$. En su lugar agregamos el arco $(v_i, v_{n+j})$ $=(f_0(v_i), f_1(v_j))$ a $Q'$. Seguimos completando $Q'$ con aristas $(f_1(u), f_1(w))$ por cada arista común $(u,w)$ que encontramos en $Q$. Eventualmente llegamos a una segunda arista especial (por hipótesis existe), $(v_s, v_t)$, y en su lugar agregamos el arco $(v_{n+s}, v_{2n+t}) = (f_1(v_s), f_2(v_t))$ a $Q'$. Ahora bien, en este punto si $Q$ es mínimo lo mejor que puede hacer es tomar el camino de distancia mínima desde $v_t$ hasta $v_{n-1}$. Pero tal camino es isomorfo a un camino desde $v_{2n+t}=f_2(v_t)$ hasta $v_{3n-1}=f_2(v_{n-1})$, pues el tercer nivel es isomorfo a $G$. Por lo tanto agregando este camino a $Q'$, llegamos a que $Q'$ es un camino de $v_0$ a $v_{3n-1}$ en $G'$. \\
+	 Pero como $|Q'|=|Q|<|P|=|P'|$, encontramos un camino más corto que $P'$ en $G'$ tal que conecta los mismos vértices. Esto es absurdo, pues por hipótesis $P'$ era camino mínimo. Luego, el absurdo provino de suponer que $P$ no era óptimo para el problema.
 \end{itemize}
 
 Finalmente, queda demostrada la proposición. $\qed$
@@ -238,7 +321,7 @@ De hecho, la recíproca de esta proposición también vale. No lo probamos sin e
 
 \subsubsection{Explicación del código}
 
-Notar que para las dimensiones del grafo que toma BFS no usamos $n$ y $m$ sino $n'$ y $m'$, para no confundir con las dimensiones del problema original porque pueden ser diferentes, y de hecho por cómo lo vamos a usar, así va a ser.
+Notar que para las dimensiones del grafo que toma BFS no usamos $n$ y $m$ sino $n'$ y $m'$, para no confundir con las dimensiones del problema original puesto que pueden ser diferentes, y de hecho por cómo lo vamos a usar, así va a ser.
 
 \begin{algorithm}[H]
   \begin{algorithmic}[1]
@@ -380,17 +463,19 @@ Por otra parte, observando el algoritmo \ref{algo:1-1}, $BFS$ tiene una compleji
 
 \begin{equation}
 \begin{aligned}
-	O(1+2n+3+2n+(\sum_{i=0}^{n-1}d(v_{i}))\times 5 + m + 1 + 2m) & = O(5+4n+2m\times 5 + 3m) \\
-	&= O(4n+13m) \\
-	&= O(n+m)
+	O(1+2n'+3+2n'+(\sum_{i=0}^{n'-1}d(v_{i}))\times 5 + m' + 1 + 2m') & = O(5+4n'+2m'\times 5 + 3m') \\
+	&= O(4n'+13m') \\
+	&= O(n'+m')
 \end{aligned}
 \end{equation}
 
-Notar que en el primer término podemos escribir la sumatoria de los grados de todos los nodos debido a que en peor caso hará falta pasar por todos ellos, y por otra parte sabemos que pasamos por cada uno exactamente una vez. El segundo término resulta de agrupar y reemplazar la sumatoria por $2m$ (cosa que podemos hacer pues es una identidad válida para todos los grafos).
+Notar que en el primer término podemos escribir la sumatoria de los grados de todos los nodos debido a que en peor caso hará falta pasar por todos ellos, y por otra parte sabemos que pasamos por cada uno exactamente una vez. El segundo término resulta de agrupar y reemplazar la sumatoria por $2m'$ (cosa que podemos hacer pues es una identidad válida para todos los grafos).
+
+En nuestro problema concreto $n'=3\times n$ y $m' = 3\times m$ (por cada arista que saque estoy poniendo un arco que lo compensa).
 
 Luego, la complejidad asintótica del algoritmo en peor caso es $O(n+m+3n+3m) = O(4(n+m)) = O(n+m)$. Por otra parte como dijimos que también era $\Omega(n+m)$, tenemos que es $\Theta(n+m)$.
 
-De hecho, asintóticamente también lo es en mejor caso (cuando existe un camino de longitud 3): si bien $BFS$ puede ser $\Theta(1)$ debido a que nuestra implementación termina de buscar una vez que encuentra al nodo deseado, armar el grafo sigue siendo $\Theta(n+m)$ en cualquier caso.
+De hecho, asintóticamente también lo es en mejor caso (cuando existe un camino de longitud 3): si bien $BFS$ puede ser $\Theta(1)$ debido a que nuestra implementación termina de buscar una vez que encuentra al nodo deseado, armar el grafo sigue siendo $\Theta(n+m)$ en cualquier caso. En definitiva no tiene sentido hablar de mejor o peor caso pues ambos son iguales.
 
 \subsection{Performance del algoritmo}
 
