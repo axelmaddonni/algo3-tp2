@@ -9,6 +9,7 @@ import random
 import sys
 import os
 import subprocess
+from collections import defaultdict
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -87,26 +88,28 @@ def encontrar_k(puntos, f):
 def graficar(posiciones, datos, f, texto):
     puntos = zip(map(float, posiciones), map(median, datos))
     k = encontrar_k(puntos, lambda n: f(n))
+    k *= 1.2
     posiciones_ints = map(int, posiciones)
 
     plt.figure()
-    plt.subplot(1,2,1)
+    #plt.subplot(1,2,1)
     plt.plot(posiciones_ints, map(median, datos), label="Nuestro algoritmo")
     plt.plot(posiciones_ints, map(lambda n: k * f(n), posiciones_ints),
-            label=str(k) + " * " + texto)
+            label=str(k)[:5] + " * " + texto)
     plt.ylabel("Tiempo (us)")
     plt.xlabel("Tamano de la entrada")
     plt.legend(loc=2)
 
-    plt.subplot(1,2,2)
-    plt.plot(posiciones_ints, map(lambda (n, tiempo): tiempo / f(n),
-        zip(posiciones_ints, map(median, datos))),
-            label="Nuestro algoritmo")
-    plt.ylabel("Tiempo (us) / " + texto)
-    plt.ylim([0, k * 1.5])
-    plt.xlabel("Tamano de la entrada")
-    plt.legend(loc=2)
+    #plt.subplot(1,2,2)
+    #plt.plot(posiciones_ints, map(lambda (n, tiempo): tiempo / f(n),
+    #    zip(posiciones_ints, map(median, datos))),
+    #        label="Nuestro algoritmo")
+    #plt.ylabel("Tiempo (us) / " + texto)
+    #plt.ylim([0, k * 1.5])
+    #plt.xlabel("Tamano de la entrada")
+    #plt.legend(loc=2)
 
+    plt.savefig("fig.pdf")
     plt.show()
 
 def generar1(n, cual):
@@ -127,6 +130,13 @@ def generar1(n, cual):
         f.write(str(ai) + " " + str(bi) + " " + str(ei) + "\n")
     return len(grafo)
 
+def generar3(n, m):
+    f = open(archivo, "w")
+    f.write(str(n) + " " + str(m) + "\n")
+    for i in range(n):
+        for j in range(m):
+            f.write(str(random.randint(1, 100)) + " ")
+        f.write("\n")
 
 def general(cero, m, generador, cual, f, texto, debo_graficar=True):
     # cero = si tamanio_muestra vale 0 a cuanto lo cambiamos.
@@ -138,6 +148,7 @@ def general(cero, m, generador, cual, f, texto, debo_graficar=True):
     datos = []
     posiciones = []
     for tamanio_muestra in range(0, ultimo, granularidad):
+        print tamanio_muestra
         if tamanio_muestra == 0: tamanio_muestra = cero
         mediciones = []
         for seed in range(cantidad_muestras):
@@ -157,35 +168,88 @@ def main1peor():
     general(2, 10, generar1, "peor", lambda n: n * n, "n^2")
 
 def main1promedio():
-    posiciones, datos = general(2, 10, generar1, "promedio", None, None, False)
+    datos = defaultdict(list)
+    for tamanio_muestra in range(0, ultimo, granularidad):
+        if tamanio_muestra == 0: tamanio_muestra = 2
+        for seed in range(cantidad_muestras):
+            mediciones = []
+            m = generar1(tamanio_muestra, "promedio")
+            tiempo = min([correr_programa(binario) for _ in range(20)])
+            datos[tamanio_muestra + m].append(tiempo)
 
-    puntos = zip(map(float, posiciones), map(max, datos))
-    k = encontrar_k(puntos, lambda n: f(n))
+    posiciones = sorted(datos.keys())
+    numeros = [min(datos[i]) for i in posiciones]
+
+    puntos = zip(map(float, posiciones), numeros)
+    k = encontrar_k(puntos, lambda n: n)
     posiciones_ints = map(int, posiciones)
 
     plt.figure()
-    plt.subplot(1,2,1)
-    plt.boxplot(posiciones_ints, map(median, datos), label="Nuestro algoritmo")
-    plt.plot(posiciones_ints, map(lambda n: k * f(n), posiciones_ints),
-            label=str(k) + " * " + texto)
+    plt.plot(posiciones_ints, numeros, label="Nuestro algoritmo")
+    plt.plot(posiciones_ints, map(lambda n: k * n, posiciones_ints),
+            label=str(k)[:5] + " * (n + m)")
     plt.ylabel("Tiempo (us)")
-    plt.xlabel("Tamano de la entrada")
+    plt.xlabel("Tamano de la entrada (n + m)")
     plt.legend(loc=2)
+    '''
 
-    plt.subplot(1,2,2)
-    plt.plot(posiciones_ints, map(lambda (n, tiempo): tiempo / f(n),
-        zip(posiciones_ints, map(median, datos))),
+    plt.figure()
+    plt.plot(posiciones_ints,
+            map(lambda (x, y): float(y) / x, puntos),
             label="Nuestro algoritmo")
-    plt.ylabel("Tiempo (us) / " + texto)
-    plt.ylim([0, k * 1.5])
-    plt.xlabel("Tamano de la entrada")
+    plt.ylabel("Tiempo (us) / (n + m)")
+    plt.xlabel("Tamano de la entrada (n + m)")
+    plt.ylim([0, 0.4])
+    plt.legend(loc=2)
+    '''
+
+    plt.savefig("fig.pdf")
+    plt.show()
+
+
+def main3():
+    datos = defaultdict(list)
+    for tamanio_muestra in range(0, ultimo, granularidad):
+        if tamanio_muestra == 0: tamanio_muestra = 2
+        for seed in range(cantidad_muestras):
+            mediciones = []
+            m = random.randint(1, tamanio_muestra)
+            generar3(tamanio_muestra, m)
+            tiempo = min([correr_programa(binario) for _ in range(20)])
+            datos[tamanio_muestra * m].append(tiempo)
+
+    posiciones = sorted(datos.keys())
+    numeros = [min(datos[i]) for i in posiciones]
+
+    puntos = zip(map(float, posiciones), numeros)
+    k = encontrar_k(puntos, lambda n: n)
+    posiciones_ints = map(int, posiciones)
+
+    '''
+    plt.figure()
+    plt.plot(posiciones_ints, numeros, label="Nuestro algoritmo")
+    plt.plot(posiciones_ints, map(lambda n: k * n, posiciones_ints),
+            label=str(k)[:5] + " * (nm)")
+    plt.ylabel("Tiempo (us)")
+    plt.xlabel("Tamano de la entrada (nm)")
+    plt.legend(loc=2)
+    '''
+
+    plt.figure()
+    plt.plot(posiciones_ints,
+            map(lambda (x, y): float(y) / x, puntos),
+            label="Nuestro algoritmo")
+    plt.ylabel("Tiempo (us) / (nm)")
+    plt.xlabel("Tamano de la entrada (nm)")
+    plt.ylim([0, 0.03])
     plt.legend(loc=2)
 
+    plt.savefig("fig.pdf")
     plt.show()
 
 
 if problema == 1:
-    main1peor()
+    main1promedio()
 elif problema == 2:
     main2()
 else:
