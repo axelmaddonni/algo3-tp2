@@ -1,5 +1,5 @@
 \subsection{Explicación formal del problema}
-Sea $G=(V,E)$ un grafo simple conexo con $n\geq 2$ vértices y $m$ aristas. Además sea $M\subseteq E$ tal que $M\neq \emptyset$. Se desea hallar un camino (no necesariamente simple) de $v_0$ a $v_{n-1}$ que pase al menos dos veces por un eje de $M$ (potencialmente el mismo) y que tenga longitud mínima.
+Sea $G=(V,E)$ un grafo simple conexo con $V=\{v_0, v_1, \dots, v_{n-1}\}$, $n\geq 2$, y $m$ aristas. Además sea $M\subseteq E$ tal que $M\neq \emptyset$. Se desea hallar un camino (no necesariamente simple) de $v_0$ a $v_{n-1}$ que pase al menos dos veces por un eje de $M$ (potencialmente el mismo) y que tenga longitud mínima.
 
 En la figura (\ref{fig:ej-1.1}) pueden verse tres ejemplos. Los tres son muy parecidos pero permiten ilustrar distintas situaciones. En el primero (de izquierda a derecha y de arriba a abajo) encontramos el camino simple $P=(v_0,v_1,v_3,v_4,v_5)$ de longitud 4 que cumple con lo pedido pues tiene dos aristas especiales y es de longitud mínima. 
 
@@ -96,7 +96,7 @@ En el último caso, la arista recientemente agregada pasa a ser especial. Al hac
 \subsection{Explicación de la solución}
 Si bien lo que se pide es, en definitiva, encontrar un camino mínimo en $G$, la dificultad adicional que implica hacer que el camino contenga al menos dos aristas de $M$ hace que no podamos aplicar de forma directa los algoritmos clásicos para este propósito. Para solventar esto consideraremos un grafo alternativo a $G$, $G'$, con el cual resolver el problema planteado originalmente será equivalente a encontrar un camino mínimo en $G'$ de forma tradicional (en este caso utilizando BFS).
 
-\subsubsection{Nuevo grafo para el modelado}
+\subsubsection{Construcción de $G'$}
 Lo primero que haremos es armarnos un grafo nuevo $G'$ a partir de $G$. 
 
 Consideramos tres grafos isomorfos a $G$: $G_0=(V_0,E_0)$, $G_1=(V_1,E_1)$ y $G_2=(V_2,E_2)$, tales que $f_k:V\rightarrow V_k/ f_k(v_i) = v_{k\times n + i}$ para $k\in \{0,1,2\}$ son las biyecciones correspondientes. En particular, $G_1 = G$. La figura (\ref{fig:ej-1.2}) ilustra la situación para un ejemplo puntual.
@@ -198,7 +198,7 @@ Observar que en $M'$ solo hay arcos que van de nodos de $G_0$ a nodos de $G_1$, 
 
 Entonces hasta acá tenemos tres grafos conexos isomorfos. Podemos pensarlos como las tres componentes conexas de un grafo con $3n$ vértices y $3m$ aristas. A continuación uniremos estas tres componentes mediante los arcos de $M'$: sea $G^*=(V_1\cup V_2\cup V_3, E_1\cup E_2\cup E_3 \cup M')$. 
 
-Podemos pensar a $G^*$ con la siguiente analogía: cada una de las tres componentes es un nivel, y los arcos ``escaleras mecánicas'' que permiten subir de un nivel al siguiente en forma unidireccional y que no se saltea niveles. Notar que entonces $G'$ no es fuertemente conexo pues desde un nodo del nivel 2 o 3 no puedo alcanzar a un nodo en el nivel 1. Sin embargo, para cualquier vértice en el nivel 1 todos los vértices del grafo son alcanzables. En particular esto vale para $v_0$.  
+Podemos pensar a $G^*$ con la siguiente analogía: cada una de las tres componentes es un nivel, y los arcos ``escaleras mecánicas'' que permiten subir de un nivel al siguiente en forma unidireccional y que no se saltea niveles. En este contexto, $G_k$ será el nivel $k$. Notar que entonces $G^*$ no es fuertemente conexo pues desde un nodo del nivel 2 o 3 no puedo alcanzar a un nodo en el nivel 1. Sin embargo, para cualquier vértice en el nivel 1 todos los vértices del grafo son alcanzables. En particular esto vale para $v_0$.  
 
 \pgfmathsetmacro\angFuite{170}
 \pgfmathsetmacro\coeffReduc{1.2}
@@ -207,23 +207,23 @@ Podemos pensar a $G^*$ con la siguiente analogía: cada una de las tres componen
 \begin{figure}
 \centering
 \begin{tikzpicture}[current plane/.estyle=%
-        {cm={1,0,\coeffReduc*\cost,-\coeffReduc*\sint,(0,#1)}}]
+        {cm={1,0,\coeffReduc*\cost,-\coeffReduc*\sint,(0,#1)}}, rotate=-5]
 
 	\GraphInit[vstyle=Shade]
 
-		\begin{scope}[current plane=0 cm]
+		\begin{scope}[current plane=0 cm, rotate=10]
 			\SetVertexNoLabel
 		  \SetGraphShadeColor{white}{teal}{gray}
 		  \grEmptyCycle[Math,prefix=a]{6}
 		\end{scope}
 
-		\begin{scope}[current plane=4 cm]
+		\begin{scope}[current plane=4 cm, rotate=10]
 			\SetVertexNoLabel
 		  \SetGraphShadeColor{white}{teal}{gray}
 		  \grEmptyCycle[Math,prefix=b]{6}
 		\end{scope}
 
-		\begin{scope}[current plane=8 cm]
+		\begin{scope}[current plane=8 cm, rotate=10]
 			\SetVertexNoLabel
 		  \SetGraphShadeColor{white}{teal}{gray}
 		  \grEmptyCycle[Math,prefix=c]{6}
@@ -252,28 +252,30 @@ Podemos pensar a $G^*$ con la siguiente analogía: cada una de las tres componen
 
 	\SetGraphShadeColor{white}{red}{red}
 	\tikzset{EdgeStyle/.append style={->, solid}}
+	\Edge(a1)(b0)
+	\Edge(b1)(c0)
+	\tikzset{EdgeStyle/.append style={bend left=10}}
 	\Edge(a2)(b3)
 	\Edge(b2)(c3)
 	\Edge(a4)(b5)
 	\Edge(b4)(c5)
-	\Edge(a1)(b0)
-	\Edge(b1)(c0)
-	\tikzset{EdgeStyle/.append style={<-, opacity=.3}}
+	\tikzset{EdgeStyle/.append style={<-, opacity=.3, bend left=0}}
+	\Edge(b1)(a0)
+	\Edge(c1)(b0)
+	\tikzset{EdgeStyle/.append style={bend left=10}}
 	\Edge(b2)(a3)
 	\Edge(c2)(b3)
 	\Edge(b4)(a5)
 	\Edge(c4)(b5)
-	\Edge(b1)(a0)
-	\Edge(c1)(b0)
 	
 \end{tikzpicture}
-\caption{$G'$ para el ejemplo dado en la figura (\ref{fig:ej-1.2}). Las líneas punteadas señalan dónde solía haber una arista especial.}
+\caption{$G'$ para el ejemplo dado en la figura (\ref{fig:ej-1.2}). Las líneas punteadas señalan las aristas que estaban en $G^*$ pero que quitamos.}
 \label{fig:ej-1.3}
 \end{figure}
 
 Finalmente, definimos a $G'$ como el resultado de quitarle a los niveles 0 y 1 de $G^*$ todas las ``aristas isomorfas'' a las aristas de $M$.\footnote{En rigor, tanto $G'$ como $G^*$ sirven a nuestro propósito, pero $G'$ tiene la ventaja de que permitirá reducir el uso de memoria (potencialmente mucho si hay muchas aristas especiales) y constantes en la complejidad de la implementación.}. 
 
-En este caso ya no es cierto que cualquier vértice de $G'$ sea alcanzable desde cualquier vértice del primer nivel: en efecto, si vemos la figura (\ref{fig:ej-1.2}), al quitarle las aristas especiales al primer nivel, el nodo $v_5$ no es alcanzable desde el $v_1$. No obstante, sigue valiendo el siguiente lema:
+En este caso ya no es cierto que cualquier vértice de $G'$ sea alcanzable desde cualquier vértice del primer nivel: en efecto, si vemos la figura (\ref{fig:ej-1.3}), el nodo $v_2$ no es alcanzable desde el $v_0$. No obstante, sigue valiendo el siguiente lema:
 
 \paragraph*{Lema 1.1: }Todo vértice del tercer nivel (nivel 2) de $G'$ es alcanzable desde todo vértice del primer nivel (nivel 0). 
 
@@ -286,9 +288,9 @@ Debido a este lema, y como todas las aristas de $G'$ tienen peso 1, es posible a
 En la sección siguiente probaremos que esto es equivalente a resolver el problema planteado originalmente.
 
 \subsubsection{Correctitud y optimalidad}
-La siguiente proposición garantiza la correctitud de nuestra solución.
+La siguiente proposición garantiza la correctitud y optimalidad de nuestra solución.
 
-\paragraph*{Proposición 1.1: }
+\paragraph*{Proposición 1.1: } 
 Sea $P'=(v_0, v_{i_1},\dots, v_{i_p}, v_{3n-1})$ un camino mínimo de $v_0$ a $v_{3n-1}$ en $G'$, entonces $P = P'$ mod $n$ \footnote{$P = P'$ mod $n \Leftrightarrow P_i = v_{j\text{ mod }n}\text{ donde $P'_i=v_j$ }, i = 0,\dots, k-1$} es camino de $v_0$ a $v_{n-1}$ en G, mínimo entre los que pasan por al menos dos aristas especiales.
 
 \paragraph*{Demostración: }
@@ -449,7 +451,7 @@ Finalmente devolvemos este vector.
 
 Nuestra función main tiene tres partes importantes:
 \begin{itemize}
-	\item El armado de la lista de adyacencias de $G'$.
+	\item El armado de la lista de adyacencias de $G'$. Si la arista que estamos agregando es especial, agregamos los arcos correspondientes del nivel 0 al 1, y del 1 al 2. Si no lo es, entonces agregamos la arista tanto en el nivel 0 como en el 1. En ambos casos, agregamos la arista normalmente en el nivel 2.
 	\item El llamado a BFS pasando como parámetros la lista de adyacencias anterior, tomando como $root$ el nodo $0$ y como target el $3n-1$. Dichos parámetros cumplen las precondiciones de BFS por el Lema 1.1 y por ser todas aristas de peso 1.
 	\item La impresión del resultado. Acá es importantísimo notar que imprimimos los vértices módulo $n$ pues lo que nos devuelve BFS son nodos del grafo $G'$ y no de $G$. Por la Proposición 1.1 esto efectivamente constituye una solución al problema original.
 \end{itemize}
@@ -475,7 +477,7 @@ En nuestro problema concreto $n'=3\times n$ y $m' = 3\times m$ (por cada arista 
 
 Luego, la complejidad asintótica del algoritmo en peor caso es $O(n+m+3n+3m) = O(4(n+m)) = O(n+m)$. Por otra parte como dijimos que también era $\Omega(n+m)$, tenemos que es $\Theta(n+m)$.
 
-De hecho, asintóticamente también lo es en mejor caso (cuando existe un camino de longitud 3): si bien $BFS$ puede ser $\Theta(1)$ debido a que nuestra implementación termina de buscar una vez que encuentra al nodo deseado, armar el grafo sigue siendo $\Theta(n+m)$ en cualquier caso. En definitiva no tiene sentido hablar de mejor o peor caso pues ambos son iguales.
+De hecho, asintóticamente también lo es en mejor caso (cuando existe un camino de longitud 3): si bien $BFS$ puede ser $\Theta(1)$ debido a que nuestra implementación termina de buscar una vez que encuentra al nodo deseado, armar el grafo sigue siendo $\Theta(n+m)$ en cualquier caso. En definitiva no tiene sentido hablar de mejor o peor caso pues ambos son iguales en términos asintóticos.
 
 \subsection{Performance del algoritmo}
 
