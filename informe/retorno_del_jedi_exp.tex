@@ -1,11 +1,17 @@
 
 
+Como dijimos antes, la complejidad del algoritmo es siempre $\Theta(n m)$, sin distinción entre casos, por lo que el análisis de performance es simple.
+
+Primero veamos que, en la práctica, la complejidad del algoritmo es efectivamente $\Theta(n \log n)$.
+
 \begin{figure}[H]
  \centering
 	\includegraphics[width=0.8\textwidth]{img/exp/problema3-promedio.pdf}
 	\caption{\footnotesize Tiempo que toma el algoritmo en $\mu$s para una entrada de tamaño $mn$.}
 	\label{fig:problema3-promedio}
 \end{figure}
+
+En esta imagen se ve que se comporta como debe. Sin embargo, al igual que en los problemas anteriores, para confirmarlo totalmente, realizamos el gráfico de $\frac{T(nm)}{nm}$, dado que si esta función tiene a una constante cuando $nm \to \infty$, habremos confirmado experimentalmente que la complejidad del algoritmo es de $\Theta(n m)$.
 
 \begin{figure}[H]
  \centering
