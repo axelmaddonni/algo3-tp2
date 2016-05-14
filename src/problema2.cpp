@@ -88,10 +88,8 @@ void MinHeap::MinHeapify(int i) {
     }
 }
 
-std::pair<int, std::vector<int>> prim(
-    MinHeap& heap, std::vector<VerticesAdyacentes> adj_list) {
+std::vector<int> prim(MinHeap& heap, std::vector<VerticesAdyacentes> adj_list) {
   std::vector<int> parent(heap.Size(), 0);
-  int litros = 0;
 
   while (heap.Size() > 0) {
     Vertex min_vertex = heap.Pop();
@@ -102,12 +100,11 @@ std::pair<int, std::vector<int>> prim(
       int weight = vertex_and_weight.second;
       if (heap.At(v) && weight < heap.Value(v)) {
         parent[v] = u;
-        litros += weight;
         heap.DecValue(v, weight);
       }
     }
   }
-  return std::make_pair(litros, std::move(parent));
+  return std::move(parent);
 }
 
 
@@ -115,12 +112,15 @@ int main() {
   int n, m;
   std::cin >> n >> m;
   std::vector<VerticesAdyacentes> adj_list(n, VerticesAdyacentes());
+  std::vector<std::vector<int>> adj_matrix(n, std::vector<int>(n, 0));
 
   for (int i = 0; i < m; i++) {
     int ai, bi, li;
     std::cin >> ai >> bi >> li;
     adj_list[ai].push_back(std::make_pair(bi, li));
     adj_list[bi].push_back(std::make_pair(ai, li));
+    adj_matrix[ai][bi] = li;
+    adj_matrix[bi][ai] = li;
   }
 
   std::chrono::time_point<std::chrono::system_clock> start, end;
@@ -132,17 +132,20 @@ int main() {
     v_inicial.push_back({.key = i, .value = std::numeric_limits<int>::max()});
   }
   MinHeap h(v_inicial);  
-  std::pair<int, std::vector<int>> resultado = prim(h, adj_list);
+  std::vector<int> resultado = prim(h, adj_list);
+  int litros = 0;
+  for (unsigned int i = 0; i < resultado.size(); i++) {
+    // Estamos seguros que la arista esta en el grafo.
+    litros += adj_matrix[i][resultado[i]];
+  }
 
   end = std::chrono::system_clock::now(); /* Terminamos medicion de tiempo */
   #ifdef TOMAR_TIEMPO
   std::cerr << std::chrono::duration<double>(end - start).count();
   #endif
 
-  int& litros = resultado.first;
-  std::vector<int>& parent = resultado.second;
   std::cout << litros << std::endl;
-  for (size_t i = 1; i < parent.size(); i++) {
-    std::cout << parent[i] << std::endl;
+  for (size_t i = 1; i < resultado.size(); i++) {
+    std::cout << resultado[i] << std::endl;
   }
 }
