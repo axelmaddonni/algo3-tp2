@@ -91,7 +91,6 @@ void MinHeap::MinHeapify(int i) {
 std::vector<std::pair<int, int>> prim(
     MinHeap& heap, std::vector<VerticesAdyacentes> adj_list) {
   std::vector<std::pair<int, int>> parent(heap.Size(), std::make_pair(0, 0));
-  int litros = 0;
 
   while (heap.Size() > 0) {
     Vertex min_vertex = heap.Pop();
@@ -103,7 +102,6 @@ std::vector<std::pair<int, int>> prim(
       if (heap.At(v) && weight < heap.Value(v)) {
         parent[v].first = u;
         parent[v].second = weight;
-        litros += weight;
         heap.DecValue(v, weight);
       }
     }
