@@ -1,1 +1,42 @@
 
+\subsection{Generación de grafos conexos aleatorios}
+
+\begin{algorithm}[H]
+  \begin{algorithmic}[1]
+  \caption{Pseudocódigo del procedimiento para generar grafos conexos al azar}
+  \label{algo:ap-1}
+    \Procedure{grafo\_random}{\texttt{int} $n$, \texttt{int} $m$}$\rightarrow$ \texttt{Grafo}
+
+    	\State $k_n \gets \{(0,1), (0,2), ..., (0,n), (1,2), (1,3), ..., (n-2, n-1)\}$
+      \State $vertices \gets \{random.range(0, n)\}$ \Comment Empiezo con un vértice al azar
+      \State $agm \gets \{\}$
+      \While{$vertices$.size() $< n$}
+         \State $aristas \gets$ ``aristas $(u,v)$ de $k_n$ tal que $u \in vertices$ y $v \not\in vertices$ o viceversa''
+         \State $arista\_nueva \gets$ random.choice($aristas$)
+         \State $agm.add(arista\_nueva)$
+         \State $k_n.remove(arista\_nueva)$
+         \State $vertices.add($``extremo de $arista\_nueva$ que no estaba en vertices''$)$
+      \EndWhile
+      \State \Comment Cuando termina este ciclo tenemos un árbol de $n$ aristas
+      \State $grafo \gets agm$
+      \While{$grafo$.size() $< m$}
+         \State $arista \gets random.choice(k_n)$
+         \State $grafo.add(arista)$
+         \State $k_n.remove(arista)$
+      \EndWhile
+      \For{$arista \in grafo$}
+         \State{$peso(arista) \gets random.random()$}
+      \EndFor
+      \Return $grafo$
+		\EndProcedure
+	\end{algorithmic}
+\end{algorithm}
+
+
+El algoritmo, se basa en generar un grafo conexo minimal (es decir, un árbol) de $n$ vértices.
+Para lograr esto, técnicamente lo que hacemos es empezar con $K_n$, es decir, el grafo completo de $n$ vértices, con todos sus aristas de igual peso, y le encontramos un árbol generador mínimo utilizando Prim. Todo esto es obviamente trivial en este caso, dado que todas las aristas tienen igual peso, así que básicamente lo que hacemos es elegir una arista al azar en cada paso.
+
+Luego, una vez que tenemos el árbol terminado, lo completamos con aristas al azar, hasta llegar al objetivo de $m$ aristas. 
+
+Finalmente, se eligen pesos al azar para cada arista.
+

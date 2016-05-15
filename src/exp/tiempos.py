@@ -124,20 +124,24 @@ def graficar(posiciones, datos, f, texto):
 def generar1(n, cual):
     m_min = n - 1
     m_max = n * (n - 1) // 2
+    especial = cual == "especial"
     grafo = grafo_random(n, m_min) if cual == "mejor" else \
                 (grafo_random(n, m_max) if cual == "peor" else \
-                    grafo_random(n, random.randint(m_min, m_max)))
+                    (grafo_random(15, 100) if cual == "especial" else \
+                        grafo_random(n, random.randint(m_min, m_max))))
 
-    f = open(archivo, "w")
-    f.write(str(n) + " " + str(len(grafo)) + "\n")
+    input_string = ''
+    input_string += (str(15 if especial else n) + " " + str(len(grafo)) + "\n")
     caminos_especiales = random.randint(1, len(grafo))
+    if especial:
+        caminos_especiales = n
     for i in range(len(grafo)):
         ai = grafo[i][0]
         bi = grafo[i][1]
         ei = int(caminos_especiales > 0)
         caminos_especiales -= 1
-        f.write(str(ai) + " " + str(bi) + " " + str(ei) + "\n")
-    return len(grafo)
+        input_string += (str(ai) + " " + str(bi) + " " + str(ei) + "\n")
+    return input_string, len(grafo)
 
 def generar2(n, m):
     grafo = grafo_random(n, m)
@@ -172,8 +176,9 @@ def general(cero, m, generador, cual, f, texto, debo_graficar=True):
         mediciones = []
         for seed in range(cantidad_muestras):
             random.seed(seed)
-            generador(tamanio_muestra, cual)
-            mediciones.append(min([correr_programa(binario) for _ in range(m)]))
+            input_string, m = generador(tamanio_muestra, cual)
+            mediciones.append(min(
+                [correr_programa(binario, input_string) for _ in range(m)]))
         datos.append(mediciones)
         posiciones.append(tamanio_muestra)
     if debo_graficar:
@@ -192,8 +197,9 @@ def main1promedio():
         if tamanio_muestra == 0: tamanio_muestra = 2
         for seed in range(cantidad_muestras):
             mediciones = []
-            m = generar1(tamanio_muestra, "promedio")
-            tiempo = min([correr_programa(binario) for _ in range(20)])
+            input_string, m = generar1(tamanio_muestra, "promedio")
+            tiempo = min(
+                    [correr_programa(binario, input_string) for _ in range(20)])
             datos[tamanio_muestra + m].append(tiempo)
 
     posiciones = sorted(datos.keys())
@@ -221,6 +227,31 @@ def main1promedio():
     plt.ylim([0, 0.4])
     plt.legend(loc=2)
     '''
+
+    plt.savefig("fig.pdf")
+    plt.show()
+
+def main1especiales():
+    datos = defaultdict(list)
+    max_tiempo = 0
+    for especiales in range(2, 100, 1):
+        mediciones = []
+        input_string, m = generar1(especiales, "especial")
+        tiempo = min([correr_programa(binario, input_string) for _ in range(10)])
+        if tiempo > max_tiempo:
+            max_tiempo = tiempo
+        datos[especiales].append(tiempo)
+
+    posiciones = sorted(datos.keys())
+    numeros = [min(datos[i]) for i in posiciones]
+    posiciones_ints = map(int, posiciones)
+
+    plt.figure()
+    plt.plot(posiciones_ints, numeros, '*-', label="Nuestro algoritmo")
+    plt.ylabel("Tiempo (us)")
+    plt.ylim([0, max_tiempo * 1.5])
+    plt.xlabel("Cantidad de caminos especiales")
+    plt.legend(loc=2)
 
     plt.savefig("fig.pdf")
     plt.show()
@@ -336,7 +367,7 @@ def main3():
 
 
 if problema == 1:
-    main1promedio()
+    main1especiales()
 elif problema == 2:
     main2()
 else:
