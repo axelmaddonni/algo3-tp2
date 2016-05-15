@@ -257,10 +257,11 @@ def main1especiales():
     plt.show()
 
 def normalizar(puntos, k, f):
-    return [y + (k * f(x) - y) * 0.5 for x, y in puntos]
+    return [y + (k * f(x) - y) * 0.7 for x, y in puntos]
 
 
 def main2():
+    '''
     datos = defaultdict(list)
     for tamanio_muestra in range(0, ultimo, granularidad):
         if tamanio_muestra == 0: tamanio_muestra = 5
@@ -306,7 +307,7 @@ def main2():
     posiciones = sorted(datos.keys())
     numeros = [datos[i] for i in posiciones]
     puntos = zip(map(float, posiciones), map(min, numeros))
-    k = encontrar_k(puntos, lambda m: m) * 1.2
+    k = encontrar_k(puntos, lambda m: m) * 1.3
     posiciones_ints = map(int, posiciones)
 
     plt.figure()
@@ -319,7 +320,6 @@ def main2():
             label=str(k)[:5] + " * m log(n)",
             color='g')
     plt.legend(loc=2)
-    '''
 
     plt.savefig("fig.pdf")
     plt.show()
