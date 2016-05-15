@@ -153,6 +153,22 @@ def generar2(n, m):
         input_string += "\n"
     return input_string
 
+def generar2peor(n):
+    input_string = ""
+    input_string += str(n) + " " + str(n-1) + "\n"
+    for i in range(n-1):
+        input_string += str(i) + ' ' + str(i + 1) + ' ' + str(random.randint(0,100))
+        input_string += "\n"
+    return input_string
+
+def generar2mejor(n):
+    input_string = ""
+    input_string += str(n) + " " + str(n-1) + "\n"
+    for i in range(n-1):
+        input_string +=  '0 ' + str(i + 1) + ' ' + str(random.randint(0,100))
+        input_string += "\n"
+    return input_string
+
 def generar3(n, m):
     f = open(archivo, "w")
     f.write(str(n) + " " + str(m) + "\n")
@@ -324,6 +340,70 @@ def main2():
     plt.savefig("fig.pdf")
     plt.show()
 
+def main2peor():
+    datos = defaultdict(list)
+    for tamanio_muestra in range(0, ultimo, granularidad):
+        if tamanio_muestra == 0: tamanio_muestra = 5
+        mediciones = []
+        n = tamanio_muestra
+        m = n - 1
+        input_string = generar2peor(n)
+        tiempo = min([correr_programa(binario, input_string) for _ in range(5)])
+        print n, m, tiempo / 1000000
+        datos[int(m * math.log(float(n)))].append(tiempo)
+
+    posiciones = sorted(datos.keys())
+    numeros = [datos[i] for i in posiciones]
+    puntos = zip(map(float, posiciones), map(min, numeros))
+    k = encontrar_k(puntos, lambda m: m) * 1.3
+    posiciones_ints = map(int, posiciones)
+
+    plt.figure()
+    plt.plot(posiciones_ints,
+            map(min, numeros),'*-',
+            label="Nuestro algoritmo")
+    plt.ylabel("Tiempo (us)")
+    plt.xlabel("Tamano de la entrada (m log(n))")
+    plt.plot(posiciones_ints, map(lambda m: k * m, posiciones_ints),
+            label=str(k)[:5] + " * m log(n)",
+            color='g')
+    plt.legend(loc=2)
+
+    plt.savefig("fig.pdf")
+    plt.show()
+
+
+def main2mejor():
+    datos = defaultdict(list)
+    for tamanio_muestra in range(0, ultimo, granularidad):
+        if tamanio_muestra == 0: tamanio_muestra = 5
+        mediciones = []
+        n = tamanio_muestra
+        m = n - 1
+        input_string = generar2mejor(n)
+        tiempo = min([correr_programa(binario, input_string) for _ in range(5)])
+        print n, m, tiempo / 1000000
+        datos[int(m + n * math.log(float(n)))].append(tiempo)
+
+    posiciones = sorted(datos.keys())
+    numeros = [datos[i] for i in posiciones]
+    puntos = zip(map(float, posiciones), map(min, numeros))
+    k = encontrar_k(puntos, lambda m: m) * 1.3
+    posiciones_ints = map(int, posiciones)
+
+    plt.figure()
+    plt.plot(posiciones_ints,
+            map(min, numeros),'*-',
+            label="Nuestro algoritmo")
+    plt.ylabel("Tiempo (us)")
+    plt.xlabel("Tamano de la entrada (m log(n))")
+    plt.plot(posiciones_ints, map(lambda m: k * m, posiciones_ints),
+            label=str(k)[:5] + " * (m + n log(n))",
+            color='g')
+    plt.legend(loc=2)
+
+    plt.savefig("fig.pdf")
+    plt.show()
 
 def main3():
     datos = defaultdict(list)
@@ -369,7 +449,7 @@ def main3():
 if problema == 1:
     main1especiales()
 elif problema == 2:
-    main2()
+    main2mejor()
 else:
     main3()
 
