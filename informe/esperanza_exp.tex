@@ -49,9 +49,11 @@ Ahora veamos el caso en el que $m \in O(n^2)$. Esperaríamos que el algoritmo aq
 
 Por último, como diremos en detalle en la siguiente sección, en la que explicamos la métodología de experimentación, en todos los experimentos anteriores asumimos que no importan la cantidad de caminos especiales de un grafo dado.
 
-Esto es bastante obvio desde el punto de vista del algoritmo, pero nos parece algo muy interesante verificarlo experimentalmente, dado que en este hecho se basan todos los experimentos anteriores.
+Esto es bastante obvio desde el punto de vista del algoritmo (pues es una consecuencia inmediata de que la complejidad esté dominada por la construcción del grafo), pero nos parece algo muy interesante verificarlo experimentalmente, dado que en este hecho se basan todos los experimentos anteriores.
 
-Como puede verse en el gráfico que sigue, si tomamos $n$ y $m$ fijos, la cantidad de caminos especiales del grafo no afectan la performance del algoritmo.
+Vale notar que, no obstante, sí puede haber pequeñas diferencias como consecuencia de que BFS ciertamente puede variar su performance a partir de cómo se conectan los vértices y cuántas aristas especiales hay. Pero esto afecta solo constantes, que se traducen en poco más que ruido en el gráfico.
+
+Como puede verse en la siguiente figura, si tomamos $n$ y $m$ fijos, la cantidad de caminos especiales del grafo no afectan significativamente la performance del algoritmo.
 
 \begin{figure}[H]
  \centering
@@ -64,10 +66,10 @@ Como puede verse en el gráfico que sigue, si tomamos $n$ y $m$ fijos, la cantid
 
 \subsubsection{M\'etodo de experimentación}
 
-Para la experimentación general del algoritmo, es decir, la verificación de que su complejidad era de $\Theta(n+m)$, generabamos distintos grafos al azar ($n$ al azar y $m$ elegido al azar tal que quede conexo).
+Para la experimentación general del algoritmo, es decir, la verificación de que su complejidad era de $\Theta(n+m)$, generábamos distintos grafos al azar ($n$ al azar y $m$ elegido al azar tal que quede conexo).
 
-En los casos particulares, dado $n$ fijo, tomamos $m = n - 1$ para el primer experimento y $m = \frac{n (n - 1)}{2}$ en el segundo experimento.
+En los casos particulares, dado $n$ fijo, tomamos $m = n - 1$ para el primer experimento y $m = \frac{n (n - 1)}{2}$ en el segundo.
 
-Para la generación al azar de grafos utilizamos el algoritmo descripto en el apéndice. Vale la pena aclarar como hicimos para decidir cuántas aristas especiales tendría el grafo. Primero, lo que hicimos fue notar experimentalmente que, con $n$ y $m$ fijos, si tomabamos distinta cantidad de caminos especiales (de 2 a $m$), la varianza de las mediciones era muy baja, es decir, la cantidad de caminos especiales de un grafo no afecta en nada a la performance. 
+Para la generación al azar de grafos utilizamos el algoritmo descripto en la sección \ref{subsec:grafos-aleatorios} del apéndice. Vale la pena aclarar cómo hicimos para decidir cuántas aristas especiales tendría el grafo. Primero, lo que hicimos fue notar experimentalmente que, con $n$ y $m$ fijos, si tomábamos distinta cantidad de caminos especiales (de 2 a $m$), la varianza de las mediciones era muy baja, es decir, la cantidad de caminos especiales de un grafo no afecta a la performance. 
 
-Esto fue observado y comprobado experimentalmente anteriormente. En consecuencia, para cada $n$ y $m$ fijo, tomamos grafos totalmente al azar, con cantidad de caminos especiales también al azar, y calculamos la mediana de todos los tiempos para determinar el tiempo total.
+Esto fue observado y comprobado experimentalmente. En consecuencia, para cada $n$ y $m$ fijo, tomamos grafos totalmente al azar, con cantidad de caminos especiales también al azar, y calculamos la mediana de todos los tiempos para determinar el tiempo total.

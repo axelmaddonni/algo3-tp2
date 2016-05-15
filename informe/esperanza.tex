@@ -273,7 +273,7 @@ Podemos pensar a $G^*$ con la siguiente analogía: cada una de las tres componen
 \label{fig:ej-1.3}
 \end{figure}
 
-Finalmente, definimos a $G'$ como el resultado de quitarle a los niveles 0 y 1 de $G^*$ todas las ``aristas isomorfas'' a las aristas de $M$.\footnote{En rigor, tanto $G'$ como $G^*$ sirven a nuestro propósito, pero $G'$ tiene la ventaja de que permitirá reducir el uso de memoria (potencialmente mucho si hay muchas aristas especiales) y constantes en la complejidad de la implementación.}. 
+Finalmente, definimos a $G'$ como el resultado de quitarle a los niveles 0 y 1 de $G^*$ todas las ``aristas isomorfas'' a las aristas de $M$.\footnote{En rigor, tanto $G'$ como $G^*$ sirven a nuestro propósito, pero $G'$ tiene la ventaja de que permitirá reducir el uso de memoria (potencialmente mucho si hay muchas aristas especiales) y constantes en la complejidad de la implementación.}
 
 En este caso ya no es cierto que cualquier vértice de $G'$ sea alcanzable desde cualquier vértice del primer nivel: en efecto, si vemos la figura (\ref{fig:ej-1.3}), el nodo $v_2$ no es alcanzable desde el $v_0$. No obstante, sigue valiendo el siguiente lema:
 
@@ -393,7 +393,7 @@ Para la primer parte tenemos esencialmente tres estructuras importantes:
 \item un vector de vértices que representará nuestro árbol de caminos mínimos desde el $root$ hasta cualquier nodo, de forma que en la posición i-ésima del vector tendremos al padre del nodo $i$ en el árbol (o bien -1, si todavía no pasamos por $i$, o simplemente no es alcanzable desde $root$).
 \end{itemize}
 
-Que la búsqueda es correcta es resultado inmediato de que el algoritmo es el BFS tradicional cuya correctitud ya está probada.
+Que la búsqueda es correcta es resultado inmediato de que el algoritmo es el BFS tradicional cuya correctitud es conocida. Una discusión más detallada de este algoritmo junto con una demostración de su correctitud puede encontrarse en \cite[Ch. 22.2]{cormen}.
 
 Una vez hallado un camino mínimo hasta el nodo $target$, queremos ahora armar un vector de vértices que contenga a todos los vértices de dicho camino. Como la distancia es la cantidad de vértices en el camino menos uno, entonces el vector tendrá que tener tamaño igual a la distancia más uno. Pero como no nos interesa que el primer y último nodos estén en el vector entonces nos queda que el largo del mismo será $l=d(root, target) - 1$. Luego, es cuestión de llenar las posiciones de este vector de atrás para adelante, pues \emph{a priori} para cada nodo solo sabemos cual es su padre en el árbol de caminos mínimos. La última posición tendrá al padre del nodo $target$, la anteúltima al padre del padre y así. Iterando $l$ veces llegamos a que en la posición inicial del vector hay un nodo que es hijo de $root$ y ancestro de $target$.
 
@@ -440,7 +440,7 @@ Finalmente devolvemos este vector.
     		\Comment $O(1)$
     	\EndFor
     	\State \texttt{vector<vertice>} $solucion\gets bfs(adj\_list, 0, 3\times n)$
-    	\Comment $O(3n + 3m) = O(n + m)$
+    	\Comment $O(3n + 6m) = O(n + m)$
     	\State $print(solucion.size() + 1)$
     	\For{$v \in solucion$}
     		\State $print(v \% n)$
@@ -459,7 +459,7 @@ Nuestra función main tiene tres partes importantes:
 \subsection{Complejidad del algoritmo}
 La complejidad en peor caso de la solución es la complejidad de la función $main$. Omitiendo las partes de lectura y escritura de datos, tenemos que el costo de dicha función es el costo de armar el nuevo grafo más el costo de realizar $BFS$ sobre él.
 
-Viendo el algoritmo \ref{algo:1-2}, el costo de armar el grafo es $O(n+6m) = O(n+m)$. Vale destacar que esta complejidad es además claramente una cota inferior, pues el costo de armar el grafo nuevo depende únicamente de la cantidad de vértices y aristas, y no de las características topológicas particulares. Por lo tanto el algoritmo en general debe ser al menos $\Omega(n+m)$.
+Viendo el algoritmo \ref{algo:1-2}, el costo de armar el grafo es $O(n+6m) = O(n+m)$. Vale destacar que esta complejidad es además claramente una cota inferior, pues el costo de armar el grafo nuevo depende únicamente de la cantidad de vértices y aristas, y no de características más particulares como la cantidad de aristas especiales, la longitud de los caminos simples, etc. Por lo tanto el algoritmo en general debe ser al menos $\Omega(n+m)$.
 
 Por otra parte, observando el algoritmo \ref{algo:1-1}, $BFS$ tiene una complejidad en peor caso de 
 
@@ -473,9 +473,9 @@ Por otra parte, observando el algoritmo \ref{algo:1-1}, $BFS$ tiene una compleji
 
 Notar que en el primer término podemos escribir la sumatoria de los grados de todos los nodos debido a que en peor caso hará falta pasar por todos ellos, y por otra parte sabemos que pasamos por cada uno exactamente una vez. El segundo término resulta de agrupar y reemplazar la sumatoria por $2m'$ (cosa que podemos hacer pues es una identidad válida para todos los grafos).
 
-En nuestro problema concreto $n'=3\times n$ y $m' = 3\times m$ (por cada arista que saque estoy poniendo un arco que lo compensa).
+En nuestro problema concreto $n'=3\times n$ y $m' = 2\times 3\times m = 6\times m$ (por cada arista que sacamos estamos poniendo dos arcos).
 
-Luego, la complejidad asintótica del algoritmo en peor caso es $O(n+m+3n+3m) = O(4(n+m)) = O(n+m)$. Por otra parte como dijimos que también era $\Omega(n+m)$, tenemos que es $\Theta(n+m)$.
+Luego, la complejidad asintótica del algoritmo en peor caso es $O(n+m+3n+6m) = O(4n+7m) = O(n+m)$. Por otra parte como dijimos que también era $\Omega(n+m)$, tenemos que es $\Theta(n+m)$.
 
 De hecho, asintóticamente también lo es en mejor caso (cuando existe un camino de longitud 3): si bien $BFS$ puede ser $\Theta(1)$ debido a que nuestra implementación termina de buscar una vez que encuentra al nodo deseado, armar el grafo sigue siendo $\Theta(n+m)$ en cualquier caso. En definitiva no tiene sentido hablar de mejor o peor caso pues ambos son iguales en términos asintóticos.
 
