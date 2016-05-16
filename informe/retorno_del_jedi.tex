@@ -82,7 +82,7 @@ Dada cualquier otra posición $(i,j)$ de la matriz, el camino mínimo para llega
 Para demostrar que la función $f$ propuesta calcula el camino mínimo hasta una casilla cualquiera $M_{i,j}$ debemos ver que se cumple el \textbf{Principio de Optimalidad.} Es decir, que dado un camino óptimo desde $M_{1,1}$ hasta $M{i,j}$, $P_{i,j}$, entonces, el subcamino desde $M_{1,1}$ hasta el inmediato antecesor de $M_{i,j}$ ($P_{i-1,j}$ o $P{i,j-1}$) debe ser óptimo: 
 
 Sea $P_{i,j}$ el camino óptimo desde $M_{1,1}$ $hasta M{i,j}$.
-SPGE, puedo suponer que el inmediato antecesor de $M_{i,j}$ en $P$ es $M_{i, j-1}$. Supongamos que elsub camino hasta el antecesor de $M_{i,j}$ ($P_{i,j-1}$)  no es óptimo. Entonces, $\exists$ $P\prime_{i,j-1}$ tal que $Costo(P\prime_{i,j-1})$ $<$ $Costo(P_{i,j-1})$.
+Sin p\'erdida de generalidad puedo suponer que el inmediato antecesor de $M_{i,j}$ en $P$ es $M_{i, j-1}$. Supongamos que el subcamino hasta el antecesor de $M_{i,j}$ ($P_{i,j-1}$)  no es óptimo. Entonces, $\exists$ $P\prime_{i,j-1}$ tal que $Costo(P\prime_{i,j-1})$ $<$ $Costo(P_{i,j-1})$.
 
 Pero entonces, puedo tomar el camino  $P\prime_{i,j-1}$ y de ahí moverme a la posición $M_{i,j}$. 
 $Costo (P\prime_{i,j-1}) + Costo(M_{i-1,j} \rightarrow M_{i,j}) < Costo (P{i,j-1}) + Costo(M_{i-1,j} \rightarrow M_{i,j}) = Costo(P_{i,j})$

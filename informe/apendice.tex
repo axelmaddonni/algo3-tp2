@@ -40,3 +40,430 @@ Luego, una vez que tenemos el árbol terminado, lo completamos con aristas al az
 
 Finalmente, se eligen pesos al azar para cada arista.
 
+
+\newpage
+\subsection{Partes relevantes del código}
+\lstset{language=C++, breaklines=true, basicstyle=\footnotesize}
+\lstset{numbers=left, numberstyle=\tiny, stepnumber=1, numbersep=5pt, tabsize=2}
+
+\subsubsection{problema1.cpp}
+\begin{lstlisting}[frame=single]
+
+#include <chrono>
+#include <iostream>
+#include <queue>
+#include <vector>
+
+using namespace std;
+typedef int vertice;
+typedef vector<vertice> VerticesAdyacentes;
+typedef vector<VerticesAdyacentes> ListaAdyacencia;
+
+vector<vertice> bfs(ListaAdyacencia vs, vertice root, vertice target, int n) {
+  queue<vertice> c;
+  vector<int> distancia(n, -1); 
+  vector<int> acm(n, -1);
+  vertice actual;
+  distancia[root] = 0;
+  acm[root] = root;
+  c.push(root);
+  while (!c.empty()) {
+    actual = c.front();   
+    c.pop();
+    VerticesAdyacentes vecinos = vs[actual];
+    for (const vertice& v : vecinos) {
+      if (distancia[v] == -1) {
+        distancia[v] = distancia[actual]+1;
+        acm[v] = actual;
+        if(v == target) break;
+        c.push(v);
+      }
+    }
+  }
+  //Tengo que reconstruir el camino de atras 
+  //para adelante
+  int long_sol = distancia[target]-1;
+  vector<vertice> solucion(long_sol, 0);
+  //Arranco en el padre del nodo n-1
+  vertice v = acm[target];
+
+  for (int i = long_sol - 1; i >= 0; i--) {
+    solucion[i] = v;
+    v = acm[v];
+  }
+
+  return solucion;
+}
+
+
+int main() {
+  int n, m;
+  cin >> n >> m;
+  vector<vector<int>> input;
+  for (int i = 0; i < m; i++) {
+    int ai, bi, ei;
+    cin >> ai >> bi >> ei;
+    input.push_back(vector<int>({ai, bi, ei}));
+  }
+
+  std::chrono::time_point<std::chrono::system_clock> start, end;
+  start = std::chrono::system_clock::now(); /* Empezamos medicion de tiempo */
+  ListaAdyacencia adj_list(3*n, VerticesAdyacentes());
+  for (const vector<int>& arista : input) {
+    int ai = arista[0], bi = arista[1];
+    bool ei = arista[2];
+    if (ei) {
+      adj_list[ai].push_back(bi + n);
+      adj_list[ai + n].push_back(bi + 2*n);
+      adj_list[bi].push_back(ai + n);
+      adj_list[bi + n].push_back(ai + 2*n);
+    } else {
+      adj_list[ai].push_back(bi);
+      adj_list[bi].push_back(ai);
+      adj_list[ai + n].push_back(bi + n);
+      adj_list[bi + n].push_back(ai + n);
+    }
+
+    adj_list[ai + 2*n].push_back(bi + 2*n);
+    adj_list[bi + 2*n].push_back(ai + 2*n);
+  }
+
+  vector<vertice> solucion = bfs(adj_list, 0, 3*n-1, 3*n);
+  end = std::chrono::system_clock::now(); /* Terminamos medicion de tiempo */
+  #ifdef TOMAR_TIEMPO
+  std::cerr << std::chrono::duration<double>(end - start).count();
+  #endif
+  
+  cout << solucion.size() + 1 << endl;
+  for (const int s : solucion) {
+    cout << s % n << " ";
+  }
+  cout << endl;
+}
+\end{lstlisting}
+
+
+
+
+\subsubsection{problema2.h}
+\begin{lstlisting}[frame=single]
+#include <iostream>
+#include <utility>
+#include <vector>
+
+struct Vertex {
+  int key;
+  int value;
+};
+
+// Para facilitar la lectura. El primer elemento es el otro vertice, y el
+// segundo elemento es el costo de esa ruta.
+typedef std::vector<std::pair<int, int>> VerticesAdyacentes;
+
+// MinHeap de Vertices. Es la implementacion standard, solo que con algunos 
+// detalles cambiados. Hubo que agregar el arreglo "pos" que nos permite hacer
+// DecValue de manera rapida (logn). No implementamos funciones de insercion
+// porque no hacen falta.
+class MinHeap {
+ public:
+  MinHeap(const std::vector<Vertex>& v);
+
+  inline Vertex Top() const;
+
+  Vertex Pop();
+
+  void DecValue(int i, int new_value);
+
+  inline size_t Size() const;
+
+  inline int At(int i) const {
+    return pos[i] >= 0;
+  }
+
+  inline int Value(int i) const {
+    return a[pos[i]].value;
+  }
+
+ private:
+  inline int parent(int i) { return (i - 1) / 2; }
+  inline int left(int i) { return 2 * i + 1; }
+  inline int right(int i) { return 2 * i + 2; }
+
+  template <typename X>
+  inline void swap(std::vector<X>& a, int i, int j) {
+    X temp = a[i]; a[i] = a[j]; a[j] = temp;
+  }
+
+  template <typename X>
+  inline bool inbound(std::vector<X>& a, int i) {
+    return i < (int) a.size();
+  }
+  
+  void MinHeapify(int i);
+
+  // Array interno.
+  std::vector<Vertex> a;
+  // Posiciones de los elementos. Invariante: a[pos[i]].key = i.
+  std::vector<int> pos;
+};
+\end{lstlisting}
+
+
+
+
+\subsubsection{problema2.cpp}
+\begin{lstlisting}[frame=single]
+#include "problema2.h"
+
+#include <chrono>
+#include <cstddef>
+#include <limits>
+
+// Funcion para debugear.
+void printVertexVector(std::vector<Vertex>& vs) {
+  std::cerr << "{";
+  for(const Vertex& v : vs) {
+    std::cerr << "(" << v.key<< ", " << v.value << "), ";
+  }
+  std::cerr << "}" << std::endl;
+}
+
+MinHeap::MinHeap(const std::vector<Vertex>& v)
+  : a(v), pos(v.size(), 0) {
+  for (int i = a.size() / 2; i >= 0; i--) {
+    MinHeapify(i);
+  }
+  for (int i = 0; inbound(a, i); i++) {
+    pos[a[i].key] = i;
+  }
+}
+
+Vertex MinHeap::Top() const {
+  return a[0];
+}
+
+Vertex MinHeap::Pop() {
+  Vertex minimum = a[0];
+  // El primero deja de existir.
+  pos[a[0].key] = -1;
+  // El ultimo pasa a estar arriba de todo.
+  pos[a[a.size() - 1].key] = 0;
+
+  // El ultimo pasa estar arriba de todo.
+  a[0] = a[a.size() - 1];
+  // Achico el vector.
+  a.resize(a.size() - 1);
+  
+  // Bajo la raiz hasta dejarlo todo bien.
+  MinHeapify(0);
+  return minimum;
+}
+
+void MinHeap::DecValue(int v, int new_value) {
+    // Consigo el indice de v.
+    int i = pos[v];
+    // Le pongo el nuevo valor.
+    a[i].value = new_value;
+ 
+    // Voy para arriba "heapificando" el array.
+    while (i > 0 && a[i].value < a[parent(i)].value) {
+        // Lo cambio con su padre.
+        pos[a[i].key] = parent(i);
+        pos[a[parent(i)].key] = i;
+        swap(a, i, parent(i));
+        i = parent(i);
+    }
+}
+
+inline size_t MinHeap::Size() const {
+  return a.size();
+}
+
+void MinHeap::MinHeapify(int i) {
+    int smallest = i;
+    int l = left(i);
+    int r = right(i);
+
+    if (inbound(a, l) && a[l].value < a[smallest].value)
+      smallest = l;
+    if (inbound(a, r) && a[r].value < a[smallest].value)
+      smallest = r;
+ 
+    if (smallest != i) { 
+        // Los vertices que tengo que cambiar.
+        Vertex smallest_vertex = a[smallest];
+        Vertex index_vertex = a[i];
+        // Cambio las posiciones.
+        pos[smallest_vertex.key] = i;
+        pos[index_vertex.key] = smallest;
+        // Cambio los vertices.
+        swap(a, smallest, i);
+        // Aplico MinHeapify para abajo.
+        MinHeapify(smallest);
+    }
+}
+
+std::vector<std::pair<int, int>> prim(
+    MinHeap& heap, std::vector<VerticesAdyacentes> adj_list) {
+  std::vector<std::pair<int, int>> parent(heap.Size(), std::make_pair(0, 0));
+
+  while (heap.Size() > 0) {
+    Vertex min_vertex = heap.Pop();
+    int u = min_vertex.key;
+
+    for (const auto& vertex_and_weight :  adj_list[u]) {
+      int v = vertex_and_weight.first;
+      int weight = vertex_and_weight.second;
+      if (heap.At(v) && weight < heap.Value(v)) {
+        parent[v].first = u;
+        parent[v].second = weight;
+        heap.DecValue(v, weight);
+      }
+    }
+  }
+  return std::move(parent);
+}
+
+
+int main() {
+  int n, m;
+  std::cin >> n >> m;
+  std::vector<VerticesAdyacentes> adj_list(n, VerticesAdyacentes());
+
+  for (int i = 0; i < m; i++) {
+    int ai, bi, li;
+    std::cin >> ai >> bi >> li;
+    adj_list[ai].push_back(std::make_pair(bi, li));
+    adj_list[bi].push_back(std::make_pair(ai, li));
+  }
+
+  std::chrono::time_point<std::chrono::system_clock> start, end;
+  start = std::chrono::system_clock::now(); /* Empezamos medicion de tiempo */
+
+  std::vector<Vertex> v_inicial;
+  v_inicial.push_back({.key = 0, .value = 0});
+  for (int i = 1; i < n; i++) {
+    v_inicial.push_back({.key = i, .value = std::numeric_limits<int>::max()});
+  }
+  MinHeap h(v_inicial);  
+  std::vector<std::pair<int, int>> resultado = prim(h, adj_list);
+
+  end = std::chrono::system_clock::now(); /* Terminamos medicion de tiempo */
+  #ifdef TOMAR_TIEMPO
+  std::cerr << std::chrono::duration<double>(end - start).count();
+  #endif
+
+  int litros = 0;
+  for (const auto& x : resultado) {
+    litros += x.second;
+  }
+
+  std::cout << litros << std::endl;
+  for (size_t i = 1; i < resultado.size(); i++) {
+    std::cout << resultado[i].first << std::endl;
+  }
+}
+\end{lstlisting}
+
+
+\subsubsection{problema3.cpp}
+\begin{lstlisting}[frame=single]
+#include <algorithm> // min
+#include <chrono>
+#include <iostream>
+#include <list>
+#include <tuple>
+#include <vector>
+
+using namespace std;
+
+// La tupla corresponde a: (altura, costoMinimo, Mov: X o Z)
+typedef tuple<int, int, char> Casilla;
+
+// Definiciones
+int solve(vector<vector<Casilla>>& t, int n, int m, int h);
+int costo (const vector<vector<Casilla>>& t, int h, int i, int j, int k, int l);
+
+int costocolumna(const vector<vector<Casilla>>& t, int h, int i, int j);
+int costofila(const vector<vector<Casilla>>& t, int h, int i, int j);
+
+int main() {
+  int n, m, h;
+  cin >> n >> m >> h;
+
+  vector<vector<Casilla>> Tablero(n, vector<Casilla>(m, Casilla()));
+
+  for (int i = 0; i < n; i++) {
+    for (int j = 0; j < m; j++) {
+      cin >> get<0>(Tablero[i][j]);
+    }
+  }
+
+
+  std::chrono::time_point<std::chrono::system_clock> start, end;
+  start = std::chrono::system_clock::now(); /* Empezamos medicion de tiempo */
+
+  int resultado = solve(Tablero, n, m, h);
+  // Armo el camino minimo.
+  list<char> camino;
+  int i = n - 1;
+  int j = m - 1;
+  while (!(i == 0 && j == 0)) {
+    const char mov = get<2>(Tablero[i][j]);
+    camino.push_front(mov);
+    mov == 'Y' ? j-- : i--;
+  }
+
+  end = std::chrono::system_clock::now(); /* Terminamos medicion de tiempo */
+  #ifdef TOMAR_TIEMPO
+  std::cerr << std::chrono::duration<double>(end - start).count();
+  #endif
+
+  cout << resultado << endl;
+  for (const char mov : camino)
+    cout << mov << endl;
+
+  return 0;
+}
+
+
+int costo(const vector<vector<Casilla>>& t, int h, int i, int j, int k, int l){
+  int delta = abs(get<0>(t[i][j]) - get<0>(t[k][l]));
+  return delta <= h ? 0 : delta - h;
+}
+
+int costofila(const vector<vector<Casilla>>& t, int h, int i, int j) {
+  return get<1>(t[i-1][j]) + costo(t, h, i-1, j, i, j);
+}
+
+int costocolumna(const vector<vector<Casilla>>& t, int h, int i, int j) {
+  return get<1>(t[i][j-1]) + costo(t, h, i, j-1, i, j);
+}
+
+
+int solve(vector<vector<Casilla>>& t, int n, int m, int h) {
+  get<1>(t[0][0]) = 0;
+
+  for (int j=1; j < m; j++){
+    get<1>(t[0][j]) = costocolumna(t, h, 0, j);
+    get<2>(t[0][j]) = 'Y';
+  }
+
+  for (int i=1; i < n; i++){
+    get<1>(t[i][0]) = costofila(t, h, i, 0);
+    get<2>(t[i][0]) = 'X';
+  }
+
+  for (int i = 1 ; i < n; i++){
+    for (int j = 1; j < m; j++){
+      get<1>(t[i][j]) = min(costofila(t, h, i, j), costocolumna(t, h, i, j));
+      if (get<1>(t[i][j]) == costofila(t, h, i, j))
+        get<2>(t[i][j]) = 'X';
+      else
+        get<2>(t[i][j]) = 'Y';
+    }
+  }
+
+  return get<1>(t[n-1][m-1]);
+}
+\end{lstlisting}
