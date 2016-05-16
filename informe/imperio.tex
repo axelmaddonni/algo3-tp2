@@ -113,9 +113,9 @@ Como ya dijimos el problema se puede entender como un grafo, en el cual debemos 
 
 Para este ejercicio el código es un poco mas extenso que en los demás debido a que se tuvo que crear un heap que cumpla ciertas particularidades. Si bien en gran parte es un heap binario clásico se diferencia en que tiene un vector extra llamado $pos$ que almacena la posición de cada nodo en el heap, esto es para asegurar un costo de $O(log(n))$ en ciertas operaciones. Debido a que el heap, al igual que los vectores, arrays y demás son estructuras típicas con las cuales asumimos todos los que lean este informe estarán familiarizados asumiremos cierto conocimiento previo y omitiremos una explicación profunda sobre el funcionamiento del código en esas partes para no extender de forma innecesaria el informe e ir directo a la explicación de los algoritmos vistos en la materia, de todas maneras mas adelante explicaremos con un detalle un poco mayor las complejidades de las funciones del heap, si alguna mención no queda del todo clara se puede recurrir al código del programa el cual esta en el apéndice del informe.
 
-Los v\'ertices del heap, llamados $vertex$ están formados por dos $integers$, Primero $key$ el cual es el nombre que le asignamos al nodo y segundo $value$ que representará la menor distancia encontrada hasta el momento desde su candidato a padre hasta dicho vértice. El heap ordena sus $vertex$ de menos a mayor respecto de $value$.
+Los v\'ertices del heap, llamados $vertex$ están formados por dos $integers$, primero $key$ el cual es el nombre que le asignamos al nodo y segundo $value$ que representará la menor distancia encontrada hasta el momento desde su candidato a padre hasta dicho vértice. El heap ordena sus $vertex$ de menos a mayor respecto de $value$.
 
-VerticesAdyacentes es un vector con pares de enteros, el Primero del par representa el numero del nodo adyacente y el segundo el peso del camino que lleva hacia el.
+VerticesAdyacentes es un vector con pares de enteros, el primero del par representa el numero del nodo adyacente y el segundo el peso del camino que lleva hacia el.
 
 La función principal es la siguiente.
 
@@ -150,7 +150,7 @@ La función principal es la siguiente.
     	\For{$x \in resultado$}
     		\State $litros \gets litros + x.second$
     	\EndFor
-	\State $imPrimir\_resultados(resultado, litros)$
+	\State $imprimir\_resultados(resultado, litros)$
 	\Comment $ O(n) $
 		\EndProcedure
   \end{algorithmic}
@@ -211,22 +211,24 @@ Intentemos entender que es lo que hace este algoritmo y luego veremos por qué e
 
 Primero se construye $parent$ el vector de tuplas inicializado en pares de dos ceros. 
 
-Luego se comienza a iterar, en cada iteración se sacará el v\'ertice de menor $value$ del heap, este ya no será mas actualizado en el vector $parent$ por lo que su posición en el árbol quedará fijada. Luego se ve por cada uno de sus v\'ertices adyacentes si actualizar $parent$ o no. Como se observa en la guarda del $if$ esto sucederá si el vector adyacente esta aún en el heap (O sea si aun existe la chance de mejorar el camino) y si su distancia al último nodo que se extrajo de la cola es menor
+Luego se comienza a iterar, en cada iteración se sacará el v\'ertice de menor $value$ del heap, este ya no será mas actualizado en el vector $parent$ por lo que su posición en el árbol quedará fijada. Luego se ve por cada uno de sus v\'ertices adyacentes si actualizar $parent$ o no. Como se observa en la guarda del $if$ esto sucederá si el vector adyacente esta aún en el heap (o sea si aun existe la chance de mejorar el camino) y si su distancia al último nodo que se extrajo de la cola es menor
 que el valor que tiene actualmente en el heap, o sea si efectivamente podemos mejorar el camino cambiando el padre. En ese caso se actualizará su valor en el heap y se guardara su nuevo padre y su nuevo peso en $parent$.
 
 \subsubsection{Correctitud y Optimalidad}
 
-Veamos porque el algoritmo de Prim es correcto, o sea, veamos porque dado un grafo $G$ conexo y ponderado nos asegura conseguir un árbol generador mínimo.
+Veamos por que el algoritmo de Prim es correcto, o sea, veamos por que dado un grafo $G$ conexo y ponderado nos asegura conseguir un árbol generador mínimo.
 
-Primero veamos que el resultado describe realmente un árbol generador. Como el grafo es conexo y en el heap todos los nodos (excepto el Primero) arrancan con $value = \infty$  eventualmente todos los nodos (excepto el Primero) caen al menos una vez dentro del $if$ agregando así al vector de salida un padre y la distancia a la que están de el. El resultado final por lo tanto nos da un árbol debido a que cada nodo tiene un único padre y es generador de $G$ por haber sido formado a partir de sus propios nodos y aristas.
+Primero veamos que el resultado describe realmente un árbol generador. Como el grafo es conexo y en el heap todos los nodos (excepto el primero) arrancan con $value = \infty$  eventualmente todos los nodos (excepto el primero) caen al menos una vez dentro del $if$ agregando así al vector de salida un padre y la distancia a la que están de el. El resultado final por lo tanto nos da un árbol debido a que cada nodo tiene un único padre y es generador de $G$ por haber sido formado a partir de sus propios nodos (todos ellos) y aristas.
 
 Veamos ahora porque este grafo, $A$, es mínimo.
 Como la cantidad de árboles generadores de un grafo es finita existe alguno que es el mínimo, llam\'emoslo $A'$.
-Si $A$ e igual a $A'$ entonces es un AGM.
-Si no lo es, sea $e$ la Primera arista agregada durante la construcción de $A$, que no está en $A'$ y sea $V$ el conjunto de nodos conectados por las aristas agregadas antes que $e$, o sea las que ya quedaron fijadas al sacar el nodo del heap.
-Entonces un extremo de e está en $V$ y el otro no. Ya que $A'$ es el árbol generador mínimo de $G$ hay un camino en $A'$ que uno los dos extremos. Mientras que uno se mueve por el camino, se debe encontrar una arista $f$ uniendo un nodo de $V$ a uno que no está en $V$. En la iteración que $e$ se agrega a $A$, $f$ también se podría haber agregado y se hubiese agregado en vez de e si su peso fuera menor que el de e. Ya que $f$ no se agrego se concluye que $P(f) \geq P(e)$.
+Si $A$ es igual a $A'$ entonces es un AGM.
+Si no lo es, sea $e$ la primer arista agregada durante la construcción de $A$, que no está en $A'$ y sea $V$ el conjunto de nodos conectados por las aristas agregadas antes que $e$, o sea las que ya quedaron fijadas al sacar el nodo del heap.
+Entonces un extremo de $e$ está en $V$ y el otro no. Ya que $A'$ es el árbol generador mínimo de $G$ hay un camino en $A'$ que une los dos extremos. Moviéndose por este camino, se debe encontrar eventualmente una arista $f$ uniendo un nodo de $V$ a uno que no está en $V$. En la iteración que $e$ se agrega a $A$, $f$ también se podría haber agregado y se hubiese agregado en vez de $e$ si su peso fuera menor que el de $e$. Ya que $f$ no se agregó se concluye que $P(f) \geq P(e)$.
 
-Sea $A''$ el grafo obtenido al remover $f$ y agregar $e$ a $A'$. Es fácil mostrar que $A''$ es conexo y tiene la misma cantidad de aristas que $A'$, y el peso total de sus aristas no es mayor que el de $A'$, entonces también es un AGM de $G$ y contiene a $e$ y todas las aristas agregadas anteriormente durante la construcción de $V$. Si se repiten los pasos mencionados anteriormente, eventualmente se obtendrá el árbol generador mínimo de $G$ que es igual a $A$.
+Sea $A''$ el grafo obtenido al remover $f$ y agregar $e$ a $A'$. Es fácil mostrar que $A''$ es conexo: al quitar una arista de un árbol quedan determinadas exactamente dos componentes conexas, que luego conectamos con una arista que tiene un extremo en cada componente. Que tiene la misma cantidad de aristas que $A'$ es trivial, y que el peso total de sus aristas no es mayor que el de $A'$ se deduce de lo dicho en el párrafo anterior. Entonces también es un AGM de $G$ y contiene a $e$ y todas las aristas agregadas anteriormente durante la construcción de $V$. 
+
+Si se itera este procedimiento, eventualmente se obtendrá el árbol generador mínimo de $G$ que es igual a $A$.
 
 Esto demuestra que $A$ es el AGM de $G$.
 
@@ -234,9 +236,9 @@ Esto demuestra que $A$ es el AGM de $G$.
 
 Dado un grafo $G$, conexo y ponderado, nuestro algoritmo tendrá una complejidad de $O(m \log(n))$ para el peor caso, la cual podrá ser mejorada para algunas instancias consiguiendo $O(m + n \log(n))$.
 
-Analicemos de donde salen dichas afirmaciones. Primero veremos el peor caso. La función main esta compuesta por la Primer parte donde  genera un vector de adyacencia, Primero inicializado en valores nulos $O(n)$ y luego llenado con los datos de entrada $O(m)$.
+Analicemos de donde salen dichas afirmaciones. primero veremos el peor caso. La función main esta compuesta por la primer parte donde  genera un vector de adyacencia, primero inicializado en valores nulos $O(n)$ y luego llenado con los datos de entrada $O(m)$.
 
-Luego se crea un vector $v\_inicial$ el cual será el heap que recibirá de entrada la función $Prim$ este se llena con $n$ nodos, el Primero inicializado en $0$ y los demás con $value$ infinito y un $key$ distintivo entre $1$ y $n-1$. 
+Luego se crea un vector $v\_inicial$ el cual será el heap que recibirá de entrada la función $Prim$ este se llena con $n$ nodos, el primero inicializado en $0$ y los demás con $value$ infinito y un $key$ distintivo entre $1$ y $n-1$. 
 Esto cuesta $\theta(n)$. Para convertirlo luego en un heap se utiliza $MinHeap$ que cuesta $O(n \log(n))$ por utilizar $n$ veces a la función $MinHeapify$ que es $O(\log(n))$, ya que es una función recursiva que se ejecuta a si misma pero con una entrada de la mitad de tamaño, por lo que en el peor de los casos se llama $\log_2 n$ veces.
 
 Una vez hecho esto se ejecuta Prim, viendo el pseudocódigo se puede ver que realizamos por cada elemento del heap un pop el cual cuesta $O(log(n))$ por utilizar $MinHeapify$ mas otras operaciones de costo constante.
@@ -263,7 +265,7 @@ Dado un $n$ y $m$ fijo la mayor parte de las operaciones del programa van a real
 	$$O( \sum_{i=0}^{n-1}d(v_{i}) - n + 2n \log(n) ) = $$
 	$$O( 2m - n + n \log(n) ) = O( m + n (\log(n)-1) ) = O( m + n \log(n)) $$
 
-Se tendrá esta complejidad temporal por ejemplo cuando la guarda del if se cumpla para todos los adyacentes al Primer nodo de heap y luego no se actualice mas el vector $parent$.
+Se tendrá esta complejidad temporal por ejemplo cuando la guarda del if se cumpla para todos los adyacentes al primer nodo de heap y luego no se actualice mas el vector $parent$.
 
 Esto puede suceder, por ejemplo en el siguiente grafo.
 	
