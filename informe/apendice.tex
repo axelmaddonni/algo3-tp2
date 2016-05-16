@@ -49,7 +49,6 @@ Finalmente, se eligen pesos al azar para cada arista.
 \subsubsection{problema1.cpp}
 \begin{lstlisting}[frame=single]
 
-#include <chrono>
 #include <iostream>
 #include <queue>
 #include <vector>
@@ -106,8 +105,6 @@ int main() {
     input.push_back(vector<int>({ai, bi, ei}));
   }
 
-  std::chrono::time_point<std::chrono::system_clock> start, end;
-  start = std::chrono::system_clock::now(); /* Empezamos medicion de tiempo */
   ListaAdyacencia adj_list(3*n, VerticesAdyacentes());
   for (const vector<int>& arista : input) {
     int ai = arista[0], bi = arista[1];
@@ -129,10 +126,6 @@ int main() {
   }
 
   vector<vertice> solucion = bfs(adj_list, 0, 3*n-1, 3*n);
-  end = std::chrono::system_clock::now(); /* Terminamos medicion de tiempo */
-  #ifdef TOMAR_TIEMPO
-  std::cerr << std::chrono::duration<double>(end - start).count();
-  #endif
   
   cout << solucion.size() + 1 << endl;
   for (const int s : solucion) {
@@ -215,7 +208,6 @@ class MinHeap {
 \begin{lstlisting}[frame=single]
 #include "problema2.h"
 
-#include <chrono>
 #include <cstddef>
 #include <limits>
 
@@ -337,9 +329,6 @@ int main() {
     adj_list[bi].push_back(std::make_pair(ai, li));
   }
 
-  std::chrono::time_point<std::chrono::system_clock> start, end;
-  start = std::chrono::system_clock::now(); /* Empezamos medicion de tiempo */
-
   std::vector<Vertex> v_inicial;
   v_inicial.push_back({.key = 0, .value = 0});
   for (int i = 1; i < n; i++) {
@@ -347,11 +336,6 @@ int main() {
   }
   MinHeap h(v_inicial);  
   std::vector<std::pair<int, int>> resultado = prim(h, adj_list);
-
-  end = std::chrono::system_clock::now(); /* Terminamos medicion de tiempo */
-  #ifdef TOMAR_TIEMPO
-  std::cerr << std::chrono::duration<double>(end - start).count();
-  #endif
 
   int litros = 0;
   for (const auto& x : resultado) {
@@ -369,7 +353,6 @@ int main() {
 \subsubsection{problema3.cpp}
 \begin{lstlisting}[frame=single]
 #include <algorithm> // min
-#include <chrono>
 #include <iostream>
 #include <list>
 #include <tuple>
@@ -399,10 +382,6 @@ int main() {
     }
   }
 
-
-  std::chrono::time_point<std::chrono::system_clock> start, end;
-  start = std::chrono::system_clock::now(); /* Empezamos medicion de tiempo */
-
   int resultado = solve(Tablero, n, m, h);
   // Armo el camino minimo.
   list<char> camino;
@@ -413,11 +392,6 @@ int main() {
     camino.push_front(mov);
     mov == 'Y' ? j-- : i--;
   }
-
-  end = std::chrono::system_clock::now(); /* Terminamos medicion de tiempo */
-  #ifdef TOMAR_TIEMPO
-  std::cerr << std::chrono::duration<double>(end - start).count();
-  #endif
 
   cout << resultado << endl;
   for (const char mov : camino)
