@@ -28,22 +28,24 @@ Realizar estos movimientos tiene un costo que depende de un parámetro de entrad
 
 \subsubsection{Ejemplos}
 
-%\begin{figure}[H]
-%\centering
-%\begin{minipage}{0.4\textwidth}
-%  \centering
-%    \includegraphics[width=1\textwidth]{img/}
-%  \caption*{\footnotesize }
-%  \label{fig:3-1}
-%\end{minipage}%
-%\hspace{0.05\textwidth}
-%\begin{minipage}{0.4\textwidth}   
-%  \centering
-%    \includegraphics[width=1\textwidth]{img/} 
-%  \caption*{\footnotesize .}
-%  \label{fig:3-2}
-%\end{minipage}
-%\end{figure}
+\begin{figure}[H]
+\centering
+\begin{minipage}{0.3\textwidth}
+  \centering
+    \includegraphics[width=1\textwidth]{img/3-1.png}
+  \caption*{\footnotesize Ejemplo con H=0. El costo del camino mínimo resultante es 3.}
+  \label{fig:3-1}
+\end{minipage}%
+\hspace{0.2\textwidth}
+\begin{minipage}{0.3\textwidth}   
+  \centering
+    \includegraphics[width=1\textwidth]{img/3-2.png} 
+  \caption*{\footnotesize Ejemplo con H=2. El costo del camino mínimo resultante es 1.}
+  \label{fig:3-2}
+\end{minipage}
+\end{figure}
+
+\newpage
 
 \subsection{Formulación Recursiva}
 
@@ -95,14 +97,14 @@ Para los casos borde de la matriz, en la primera columna y en la primera fila, d
 Se presenta a continuación el pseudocódigo del algoritmo propuesto que resuelve el problema. El algoritmo calcula la función recursiva definida anteriormente para todas las posiciones posibles de la matriz, es decir, el costo mínimo para alcanzar cada una de esas posiciones, guardando junto con el resultado la lista de movimientos para llegar a  cada una de ellas. 
 Como se explica en la sección anterior, el costo para llegar a una posición determinada $(i,j)$ depende solamente del costo para llegar a las posiciones $(i-1, j)$ y $(i,j-1)$. En los casos particulares de casilleros que se encuentran en la primera columna o en la primera fila de la matriz, los costos dependen solamente del costo para llegar al casillero de arriba o de la izquierda respectivamente. Esto permite implementar un algoritmo \textbf{bottom-up}, es decir, podemos definir un orden determinado para calcular los resultados parciales iterativamente, evitando el overhead que resultaría de implementar la función recursivamente (top-down). Entonces, resolvemos primero los subproblemas más chicos y luego los subproblemas más grandes, guardando los resultados en un diccionario. El orden propuesto es resolver por filas, empezando por la fila 1 y terminando por la fila N, de izquierda a derecha:
 
-%\begin{figure}[H]
-% \centering
-%	\includegraphics[width=0.8\textwidth]{}
-%	\caption{\footnotesize }
-%	\label{fig:3-3}
-%\end{figure}
+\begin{figure}[H]
+ \centering
+	\includegraphics[width=0.4\textwidth]{img/3-3.png}
+	\caption{\footnotesize Dependencias entre subproblemas.}
+	\label{fig:3-3}
+\end{figure}
 
-Como se ve en la figura [INSERTAR REF], al resolver los subproblemas en este orden 
+Como se ve en la figura \ref{fig:3-3}, al resolver los subproblemas en este orden 
 se respetan las dependencias entre los mismos, ya que al resolver uno ya se tienen calculados los resultados de los subproblemas correspondientes al casillero de la izquierda y al casillero por encima del mismo.
 
 Para representar el diccionario donde se guardan los resultados de los subproblemas, utilizamos una matriz de triplas de tamaño $n \times m$, donde cada tripla es de tipo a : <\texttt{int}: $Altura$, \texttt{int}: $CostoM\acute{\imath}nimo$, \texttt{char}: $Movmimiento$>. Los campos corresponden a:
