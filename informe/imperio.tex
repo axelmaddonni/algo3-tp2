@@ -218,9 +218,9 @@ que el valor que tiene actualmente en el heap, o sea si efectivamente podemos me
 
 Veamos por que el algoritmo de Prim es correcto, o sea, veamos por que dado un grafo $G$ conexo y ponderado nos asegura conseguir un árbol generador mínimo.
 
-Primero veamos que el resultado describe realmente un árbol generador. Como el grafo es conexo y en el heap todos los nodos (excepto el primero) arrancan con $value = \infty$  eventualmente todos los nodos (excepto el primero) caen al menos una vez dentro del $if$ agregando así al vector de salida un padre y la distancia a la que están de el. El resultado final por lo tanto nos da un árbol debido a que cada nodo tiene un único padre y es generador de $G$ por haber sido formado a partir de sus propios nodos (todos ellos) y aristas.
+Primero veamos que el resultado describe realmente un árbol generador. Afirmo que prim tiene el siguiente invariante, en la iteración k arma, con los nodos que se extrajeron del heap hasta ese momento, un árbol (formado con aristas del grafo) de k nodos. Si demuestro esto entonces luego de n iteraciones tendré un arbol generador del grafo $G$. El primer pop saca a la raiz del arbol, el nodo 0, por lo que tengo un arbol valido de 1 nodo en la primer iteración. Luego en la iteración n al hacer pop, extraeré del heap al elemento que tenga la variable $value$ mas pequeña, este necesariamente tendrá como padre a alguno de los nodos que se extrajeron anteriormente ya que si no fuera asi su $value$ sería el inicial, $\infty$ y entonces habría otro con un valor menor, seguro que alguno no tiene como $value$ a $\infty$ porque si así fuera significaría que ninguno de los nodos del heap es adyacente a alguno de los nodos que extrajimos del heap lo cual es imposible en un grafo conexo. Por lo tanto como le agrego un nodo nuevo al árbol de $n-1$ nodos que tenía por hipotesis inductiva ahora tengo un nuevo árbol de $n$ nodos.
 
-Veamos ahora porque este grafo, $A$, es mínimo.
+Veamos ahora porque este grafo, $A$, es el óptimo, el de mínimo.
 Como la cantidad de árboles generadores de un grafo es finita existe alguno que es el mínimo, llam\'emoslo $A'$.
 Si $A$ es igual a $A'$ entonces es un AGM.
 Si no lo es, sea $e$ la primer arista agregada durante la construcción de $A$, que no está en $A'$ y sea $V$ el conjunto de nodos conectados por las aristas agregadas antes que $e$, o sea las que ya quedaron fijadas al sacar el nodo del heap.
@@ -236,7 +236,7 @@ Esto demuestra que $A$ es el AGM de $G$.
 
 Dado un grafo $G$, conexo y ponderado, nuestro algoritmo tendrá una complejidad de $O(m \log(n))$ para el peor caso, la cual podrá ser mejorada para algunas instancias consiguiendo $O(m + n \log(n))$.
 
-Analicemos de donde salen dichas afirmaciones. primero veremos el peor caso. La función main esta compuesta por la primer parte donde  genera un vector de adyacencia, primero inicializado en valores nulos $O(n)$ y luego llenado con los datos de entrada $O(m)$.
+Analicemos de donde salen dichas afirmaciones. Primero veremos el peor caso. La función main esta compuesta por la Primer parte donde  genera un vector de adyacencia, primero inicializado en valores nulos $O(n)$ y luego llenado con los datos de entrada $O(m)$.
 
 Luego se crea un vector $v\_inicial$ el cual será el heap que recibirá de entrada la función $Prim$ este se llena con $n$ nodos, el primero inicializado en $0$ y los demás con $value$ infinito y un $key$ distintivo entre $1$ y $n-1$. 
 Esto cuesta $\theta(n)$. Para convertirlo luego en un heap se utiliza $MinHeap$ que cuesta $O(n \log(n))$ por utilizar $n$ veces a la función $MinHeapify$ que es $O(\log(n))$, ya que es una función recursiva que se ejecuta a si misma pero con una entrada de la mitad de tamaño, por lo que en el peor de los casos se llama $\log_2 n$ veces.
@@ -244,7 +244,6 @@ Esto cuesta $\theta(n)$. Para convertirlo luego en un heap se utiliza $MinHeap$ 
 Una vez hecho esto se ejecuta Prim, viendo el pseudocódigo se puede ver que realizamos por cada elemento del heap un pop el cual cuesta $O(log(n))$ por utilizar $MinHeapify$ mas otras operaciones de costo constante.
 
 Luego por cada vértice adyacente de cada nodo hacemos una operación que cuesta a lo sumo $O(\log(n))$ si caemos dentro del if, esto es por la función $DecValue$, la cual tarda a lo sumo la altura del árbol del heap en terminar, funciona intercambiando el nodo al cual le cambiaron el valor por su padre hasta que se convierta de nuevo en un heap válido.
-Esto fue observado y comprobado experimentalmente. En consecuencia, para cada $n$ y $m$ fijo, tomamos grafos totalmente al azar, con cantidad de caminos especiales también al azar, y calculamos la mediana de todos los tiempos para determinar el tiempo total.
 
 La complejidad resultante de Prim si caemos dentro de todos los if (peor caso) será:
 
@@ -252,15 +251,17 @@ La complejidad resultante de Prim si caemos dentro de todos los if (peor caso) s
 	$$O( (\sum_{i=0}^{n-1}d(v_{i}) + n) \log(n) ) = $$
 	$$O( (2m + n) \log(n) ) = O( 2m \log(n) ) = O(m \log(n))$$ 
 
-Notar que podemos prescindir de $n$ en la suma $2m+n$ ya que el grafo es conexo y por lo tanto $n$ será menor a $2m$.
+Notar que podemos prescindir de $n$ en la suma $2m+n$ por que el grafo es conexo y por lo tanto $n$ será menor a $2m$.
 
-Finalmente se calcula el peso del árbol con una complejidad temporal de $O(n)$ a partir del vector de salida de $Prim$ y se imPrime a la salida.
+Esta complejidad fue observada y comprobada experimentalmente. En consecuencia, para cada $n$ y $m$ fijo, tomamos grafos totalmente al azar, con cantidad de caminos especiales también al azar, y calculamos la mediana de todos los tiempos para determinar el tiempo total.
+
+Finalmente se calcula el peso del árbol con una complejidad temporal de $O(n)$ a partir del vector de salida de $Prim$ y se imprime a la salida.
 
 Sumando todo lo dicho se ve que nada supera la complejidad de $Prim$ por lo que el costo final queda limitado por este en $O(m \log(n))$
 
 \subsubsection{Mejor Caso}
 
-Dado un $n$ y $m$ fijo la mayor parte de las operaciones del programa van a realizarse sin distinción en la forma que tenga el grafo aunque en el caso del if que contiene el algoritmo de Prim dentro las características del grafo si pueden importar. Si solo cay\'eramos $n$ veces en el if (mejor caso), entonces vamos a realizar una operación que cuesta $\log(n)$ solo $n$ veces de todas las iteraciones que hicimos ($\sum_{i=0}^{n-1}d(v_{i})$), sabiendo esto la complejidad de Prim será la siguiente.
+Dado un $n$ y $m$ fijo la mayor parte de las operaciones del programa van a realizarse sin distinción en la forma que tenga el grafo, excepto en el caso del if que contiene el algoritmo de Prim dentro, allí si las características del grafo pueden importar. Si solo cay\'eramos $n$ veces en el if (mejor caso), entonces vamos a realizar una operación que cuesta $\log(n)$ solo $n$ veces de todas las iteraciones que hicimos ($\sum_{i=0}^{n-1}d(v_{i})$), sabiendo esto la complejidad de Prim será la siguiente.
 	$$O( \sum_{i=0}^{n-1}d(v_{i}) - n + n \log(n) + n \log(n) ) = $$
 	$$O( \sum_{i=0}^{n-1}d(v_{i}) - n + 2n \log(n) ) = $$
 	$$O( 2m - n + n \log(n) ) = O( m + n (\log(n)-1) ) = O( m + n \log(n)) $$
