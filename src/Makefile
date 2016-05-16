@@ -4,6 +4,8 @@ PYTHON = python2
 TEST_CORRECTITUD = ./test/test-correctitud.sh
 N_TESTS = 100
 
+all: problema1 problema2 problema3
+
 problema1: problema1.cpp
 	$(CC) $(CFLAGS) problema1.cpp -o problema1
 

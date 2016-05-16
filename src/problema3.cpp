@@ -7,7 +7,7 @@
 
 using namespace std;
 
-// La tupla corresponde a: (altura, distMinima, Mov: X o Z)
+// La tupla corresponde a: (altura, costoMinimo, Mov: X o Z)
 typedef tuple<int, int, char> Casilla;
 
 // Definiciones
